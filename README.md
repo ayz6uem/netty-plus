@@ -1,1 +1,0 @@
-Netty工具包，包含通用编解码器，支持泛型的ChannelInboundHandler>，帧校验位处理等，基于reactor programing。
