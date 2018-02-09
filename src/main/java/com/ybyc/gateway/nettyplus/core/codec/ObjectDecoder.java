@@ -49,7 +49,7 @@ public class ObjectDecoder {
                 field.set(template, value);
             }
         } catch (Exception e) {
-            logger.error("decode {} failed, cause:{}", template.getClass().getSimpleName(), e.getMessage(), e);
+            logger.error("decode {} failed, cause:{}", template.getClass().getName(), e.getMessage(), e);
             throw new DecoderException(e);
         }
         return template;

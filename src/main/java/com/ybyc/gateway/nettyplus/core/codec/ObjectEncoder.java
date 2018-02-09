@@ -54,7 +54,7 @@ public class ObjectEncoder {
                 }
             }
         } catch (Exception e) {
-            logger.error("encode {} failed, cause:{}", data.getClass().getSimpleName(), e.getMessage(), e);
+            logger.error("encode {} failed, cause:{}", data.getClass().getName(), e.getMessage(), e);
             throw new EncoderException(e);
         }
         return byteBuf;
