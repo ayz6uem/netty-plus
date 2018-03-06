@@ -17,6 +17,7 @@ import java.util.List;
  */
 public class SumChecker extends MessageToMessageCodec<ByteBuf,ByteBuf> {
 
+    private int bytesOffset = 0;
     private int checkByteIndex = -1;
 
     public SumChecker() {
@@ -26,10 +27,15 @@ public class SumChecker extends MessageToMessageCodec<ByteBuf,ByteBuf> {
         this.checkByteIndex = checkByteIndex;
     }
 
+    public SumChecker(int bytesOffset, int checkByteIndex) {
+        this.bytesOffset = bytesOffset;
+        this.checkByteIndex = checkByteIndex;
+    }
+
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         msg.retain();
-        byte sum = SumHelper.loop(msg,msg.readableBytes()+checkByteIndex);
+        byte sum = SumHelper.loop(msg,bytesOffset,msg.readableBytes()+checkByteIndex);
         msg.setByte(msg.readableBytes()+checkByteIndex,sum);
         out.add(msg);
     }
@@ -37,7 +43,7 @@ public class SumChecker extends MessageToMessageCodec<ByteBuf,ByteBuf> {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         msg.retain();
-        byte loopSum = SumHelper.loop(msg,msg.readableBytes()+checkByteIndex);
+        byte loopSum = SumHelper.loop(msg,bytesOffset,msg.readableBytes()+checkByteIndex);
         byte sum = msg.getByte(msg.readableBytes()+checkByteIndex);
         if(loopSum != sum){
             throw new BytesCheckException("error check "+ByteBufUtil.hexDump(msg).toUpperCase());

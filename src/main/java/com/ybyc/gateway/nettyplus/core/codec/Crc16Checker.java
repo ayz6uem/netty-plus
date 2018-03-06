@@ -17,6 +17,7 @@ import java.util.List;
  */
 public class Crc16Checker extends MessageToMessageCodec<ByteBuf,ByteBuf> {
 
+    private int bytesOffset = 0;
     private int checkByteIndex = -2;
 
     public Crc16Checker() {
@@ -26,10 +27,15 @@ public class Crc16Checker extends MessageToMessageCodec<ByteBuf,ByteBuf> {
         this.checkByteIndex = checkByteIndex;
     }
 
+    public Crc16Checker(int bytesOffset, int checkByteIndex) {
+        this.bytesOffset = bytesOffset;
+        this.checkByteIndex = checkByteIndex;
+    }
+
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         msg.retain();
-        short crc = (short) Crc16Helper.loop(msg,msg.readableBytes()+checkByteIndex);
+        short crc = (short) Crc16Helper.loop(msg,bytesOffset,msg.readableBytes()+checkByteIndex);
         msg.setShort(msg.readableBytes()+checkByteIndex,crc);
         out.add(msg);
     }
@@ -37,7 +43,7 @@ public class Crc16Checker extends MessageToMessageCodec<ByteBuf,ByteBuf> {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         msg.retain();
-        short loopCrc = (short)Crc16Helper.loop(msg,msg.readableBytes()+checkByteIndex);
+        short loopCrc = (short)Crc16Helper.loop(msg,bytesOffset,msg.readableBytes()+checkByteIndex);
         short crc = msg.getShort(msg.readableBytes()+checkByteIndex);
         if(loopCrc != crc){
             throw new BytesCheckException("error check "+ByteBufUtil.hexDump(msg).toUpperCase());

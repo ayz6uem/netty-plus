@@ -9,11 +9,11 @@ import io.netty.buffer.ByteBuf;
 public class Crc16Helper {
 
     public static int loop(ByteBuf buf) {
-        return loop(buf,buf.readableBytes());
+        return loop(buf, 0, buf.readableBytes());
     }
-    public static int loop(ByteBuf buf, int length) {
+    public static int loop(ByteBuf buf, int offset, int length) {
         int crc = 0xffff;
-        for (int i = 0; i < length; i++) {
+        for (int i = offset; i < length; i++) {
             crc ^= buf.getByte(i) & 0xff;
             for (int j = 0; j < Byte.SIZE; j++) {
                 if ((crc & 0x01) == 1){

@@ -9,11 +9,11 @@ import io.netty.buffer.ByteBuf;
 public class SumHelper {
 
     public static byte loop(ByteBuf buf) {
-        return loop(buf,buf.readableBytes());
+        return loop(buf,0,buf.readableBytes());
     }
-    public static byte loop(ByteBuf buf, int length) {
+    public static byte loop(ByteBuf buf, int offset, int length) {
         byte sum = 0x00;
-        for (int i = 0; i < length; i++) {
+        for (int i = offset; i < length; i++) {
             sum += buf.getByte(i);
         }
         return sum;
