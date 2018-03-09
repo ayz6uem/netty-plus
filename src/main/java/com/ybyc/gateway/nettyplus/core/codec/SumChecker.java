@@ -13,9 +13,10 @@ import java.util.List;
 /**
  * 对帧末尾的校验位进行Sum校验
  * sum 默认数据类型为byte，一个字节
+ *
  * @author wangzhe
  */
-public class SumChecker extends MessageToMessageCodec<ByteBuf,ByteBuf> {
+public class SumChecker extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
     private int bytesOffset = 0;
     private int checkByteIndex = -1;
@@ -35,18 +36,18 @@ public class SumChecker extends MessageToMessageCodec<ByteBuf,ByteBuf> {
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         msg.retain();
-        byte sum = SumHelper.loop(msg,bytesOffset,msg.readableBytes()+checkByteIndex);
-        msg.setByte(msg.readableBytes()+checkByteIndex,sum);
+        byte sum = SumHelper.loop(msg, bytesOffset + 1, msg.readableBytes() - bytesOffset + checkByteIndex);
+        msg.setByte(msg.readableBytes() + checkByteIndex, sum);
         out.add(msg);
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         msg.retain();
-        byte loopSum = SumHelper.loop(msg,bytesOffset,msg.readableBytes()+checkByteIndex);
-        byte sum = msg.getByte(msg.readableBytes()+checkByteIndex);
-        if(loopSum != sum){
-            throw new BytesCheckException("error check "+ByteBufUtil.hexDump(msg).toUpperCase());
+        byte loopSum = SumHelper.loop(msg, bytesOffset + 1, msg.readableBytes() - bytesOffset + checkByteIndex);
+        byte sum = msg.getByte(msg.readableBytes() + checkByteIndex);
+        if (loopSum != sum) {
+            throw new BytesCheckException("error check " + ByteBufUtil.hexDump(msg).toUpperCase());
         }
         out.add(msg);
     }

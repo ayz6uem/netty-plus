@@ -35,7 +35,7 @@ public class XorChecker extends MessageToMessageCodec<ByteBuf,ByteBuf> {
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         msg.retain();
-        byte xor = XorHelper.loop(msg,bytesOffset,msg.readableBytes()+checkByteIndex);
+        byte xor = XorHelper.loop(msg,bytesOffset + 1,msg.readableBytes() - bytesOffset +checkByteIndex);
         msg.setByte(msg.readableBytes()+checkByteIndex,xor);
         out.add(msg);
     }
@@ -43,7 +43,7 @@ public class XorChecker extends MessageToMessageCodec<ByteBuf,ByteBuf> {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         msg.retain();
-        byte loopxor = XorHelper.loop(msg,bytesOffset,msg.readableBytes()+checkByteIndex);
+        byte loopxor = XorHelper.loop(msg,bytesOffset + 1,msg.readableBytes() - bytesOffset+checkByteIndex);
         byte xor = msg.getByte(msg.readableBytes()+checkByteIndex);
         if(loopxor != xor){
             throw new BytesCheckException("error check "+ByteBufUtil.hexDump(msg).toUpperCase());
