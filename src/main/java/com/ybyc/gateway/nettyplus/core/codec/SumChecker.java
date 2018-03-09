@@ -1,12 +1,13 @@
 package com.ybyc.gateway.nettyplus.core.codec;
 
 import com.ybyc.gateway.nettyplus.core.exception.BytesCheckException;
-import com.ybyc.gateway.nettyplus.core.util.Crc16Helper;
 import com.ybyc.gateway.nettyplus.core.util.SumHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -17,6 +18,8 @@ import java.util.List;
  * @author wangzhe
  */
 public class SumChecker extends MessageToMessageCodec<ByteBuf, ByteBuf> {
+
+    Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private int bytesOffset = 0;
     private int checkByteIndex = -1;
@@ -36,7 +39,7 @@ public class SumChecker extends MessageToMessageCodec<ByteBuf, ByteBuf> {
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         msg.retain();
-        byte sum = SumHelper.loop(msg, bytesOffset + 1, msg.readableBytes() + checkByteIndex);
+        byte sum = SumHelper.loop(msg, bytesOffset, msg.readableBytes() + checkByteIndex);
         msg.setByte(msg.readableBytes() + checkByteIndex, sum);
         out.add(msg);
     }
@@ -44,10 +47,10 @@ public class SumChecker extends MessageToMessageCodec<ByteBuf, ByteBuf> {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         msg.retain();
-        byte loopSum = SumHelper.loop(msg, bytesOffset + 1, msg.readableBytes() + checkByteIndex);
+        byte loopSum = SumHelper.loop(msg, bytesOffset, msg.readableBytes() + checkByteIndex);
         byte sum = msg.getByte(msg.readableBytes() + checkByteIndex);
         if (loopSum != sum) {
-            throw new BytesCheckException("error check " + ByteBufUtil.hexDump(msg).toUpperCase());
+            throw new BytesCheckException("loop:" + loopSum + " sum:" + sum + " bytes:" + ByteBufUtil.hexDump(msg).toUpperCase());
         }
         out.add(msg);
     }
