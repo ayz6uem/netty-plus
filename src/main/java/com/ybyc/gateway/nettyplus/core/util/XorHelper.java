@@ -11,9 +11,9 @@ public class XorHelper {
     public static byte loop(ByteBuf buf) {
         return loop(buf,0,buf.readableBytes());
     }
-    public static byte loop(ByteBuf buf,int offset, int length) {
+    public static byte loop(ByteBuf buf,int start, int end) {
         byte xor = 0x00;
-        for (int i = offset; i < length; i++) {
+        for (int i = start; i < end; i++) {
             xor ^= buf.getByte(i);
         }
         return xor;

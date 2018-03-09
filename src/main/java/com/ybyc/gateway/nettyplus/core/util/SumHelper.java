@@ -11,9 +11,9 @@ public class SumHelper {
     public static byte loop(ByteBuf buf) {
         return loop(buf,0,buf.readableBytes());
     }
-    public static byte loop(ByteBuf buf, int offset, int length) {
+    public static byte loop(ByteBuf buf, int start, int end) {
         byte sum = 0x00;
-        for (int i = offset; i < length; i++) {
+        for (int i = start; i < end; i++) {
             sum += buf.getByte(i);
         }
         return sum;
