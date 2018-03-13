@@ -98,6 +98,10 @@ public class TaskContext {
         }
     }
 
+    public void wakeup(ChannelHandlerContext channelHandlerContext, Object result) {
+        wakeup(channelHandlerContext, ChannelContext.getId(channelHandlerContext.channel()), result);
+    }
+
     public void wakeup(ChannelHandlerContext channelHandlerContext, Object id, Object directive, Object result) {
         wakeup(channelHandlerContext, Tuples.of(id, directive), result);
     }
