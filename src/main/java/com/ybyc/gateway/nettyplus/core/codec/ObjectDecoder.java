@@ -32,7 +32,6 @@ public class ObjectDecoder {
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private ByteBuf byteBuf;
-    private ByteOrder byteOrder = TcpServer.Options.DEFAULT_BYTEORDER;
 
     public ObjectDecoder(ByteBuf byteBuf) {
         this.byteBuf = byteBuf;
@@ -79,7 +78,7 @@ public class ObjectDecoder {
     private Object decodePrimitive(Class<?> fieldClass, Option option) throws Exception {
         return ByteBufHelper.readPrimitive(byteBuf
                 , option != null ? option.value() : ReflectHelper.primitiveBytes(fieldClass)
-                , byteOrder
+                , TcpServer.Options.DEFAULT_BYTEORDER
                 , option != null && option.unsigned());
     }
 
@@ -102,7 +101,7 @@ public class ObjectDecoder {
             Object value;
             if (ReflectHelper.isPrimitive(componentClass)) {
                 int bytes = ReflectHelper.primitiveBytes(componentClass);
-                value = ByteBufHelper.readPrimitive(byteBuf, bytes, byteOrder, false);
+                value = ByteBufHelper.readPrimitive(byteBuf, bytes, TcpServer.Options.DEFAULT_BYTEORDER, false);
             } else {
                 value = new ObjectDecoder(byteBuf).decode(componentClass.newInstance());
             }
@@ -125,7 +124,7 @@ public class ObjectDecoder {
         while (length == -1 || (index++) < length) {
             if (ReflectHelper.isPrimitive(componentClass)) {
                 int bytes = ReflectHelper.primitiveBytes(componentClass);
-                collection.add(ByteBufHelper.readPrimitive(byteBuf, bytes, byteOrder, false));
+                collection.add(ByteBufHelper.readPrimitive(byteBuf, bytes, TcpServer.Options.DEFAULT_BYTEORDER, false));
             } else {
                 collection.add(new ObjectDecoder(byteBuf).decode(componentClass.newInstance()));
             }

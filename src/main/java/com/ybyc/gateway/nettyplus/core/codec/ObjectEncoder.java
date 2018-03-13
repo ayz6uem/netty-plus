@@ -29,7 +29,6 @@ public class ObjectEncoder {
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private Object data;
-    private ByteOrder byteOrder = TcpServer.Options.DEFAULT_BYTEORDER;
     private ByteBuf byteBuf;
 
     public ObjectEncoder(Object data) {
@@ -86,7 +85,7 @@ public class ObjectEncoder {
 
     private boolean encodePrimitive(Number value,Option option) throws Exception {
         int bytes = option!=null?option.value():ReflectHelper.primitiveBytes(value.getClass());
-        ByteBufHelper.write(byteBuf, bytes, value, byteOrder);
+        ByteBufHelper.write(byteBuf, bytes, value, TcpServer.Options.DEFAULT_BYTEORDER);
         return true;
     }
 
@@ -101,7 +100,7 @@ public class ObjectEncoder {
             try {
                 if (ReflectHelper.isPrimitive(coll.getClass())) {
                     int bytes = ReflectHelper.primitiveBytes(coll.getClass());
-                    ByteBufHelper.write(byteBuf, bytes, (Number) coll, byteOrder);
+                    ByteBufHelper.write(byteBuf, bytes, (Number) coll, TcpServer.Options.DEFAULT_BYTEORDER);
                 } else {
                     new ObjectEncoder(coll, byteBuf).encode();
                 }
@@ -119,7 +118,7 @@ public class ObjectEncoder {
             Object object = Array.get(value, i);
             if (ReflectHelper.isPrimitive(object.getClass())) {
                 int bytes = ReflectHelper.primitiveBytes(object.getClass());
-                ByteBufHelper.write(byteBuf, bytes, (Number) object, byteOrder);
+                ByteBufHelper.write(byteBuf, bytes, (Number) object, TcpServer.Options.DEFAULT_BYTEORDER);
             } else {
                 new ObjectEncoder(object, byteBuf).encode();
             }
