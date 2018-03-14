@@ -91,10 +91,12 @@ public class TaskContext {
      * @param result
      */
     public void wakeup(ChannelHandlerContext channelHandlerContext, Object id, Object result) {
-        Task task = taskPool.remove(id);
-        if (task != null) {
-            task.timeout.cancel();
-            task.success(channelHandlerContext, result);
+        if(Objects.nonNull(id)){
+            Task task = taskPool.remove(id);
+            if (task != null) {
+                task.timeout.cancel();
+                task.success(channelHandlerContext, result);
+            }
         }
     }
 
