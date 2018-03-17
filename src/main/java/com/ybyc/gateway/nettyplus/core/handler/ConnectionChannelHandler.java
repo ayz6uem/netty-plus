@@ -24,6 +24,7 @@ public class ConnectionChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
+        ctx.channel().close();
         channelContext.offline(ctx.channel());
     }
 
