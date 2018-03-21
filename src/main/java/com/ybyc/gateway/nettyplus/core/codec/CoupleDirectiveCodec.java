@@ -15,7 +15,7 @@ import java.util.function.BiFunction;
  * 自动解码
  * @author wangzhe
  */
-public class CoupleDirectiveCodec<T> extends MessageToMessageCodec<ByteBuf,T> {
+public class CoupleDirectiveCodec extends MessageToMessageCodec<ByteBuf,Object> {
 
     public static final int DEFAULT_LENGTH = 1;
 
@@ -43,7 +43,7 @@ public class CoupleDirectiveCodec<T> extends MessageToMessageCodec<ByteBuf,T> {
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, T msg, List<Object> out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
         ByteBuf byteBuf = ObjectCodec.just(msg).encode();
         out.add(byteBuf);
     }

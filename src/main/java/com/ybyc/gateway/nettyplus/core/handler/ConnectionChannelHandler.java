@@ -21,6 +21,10 @@ public class ConnectionChannelHandler extends ChannelInboundHandlerAdapter {
     ChannelContext channelContext = ChannelContext.getInstance();
     BiConsumer<ChannelHandlerContext,IdleStateEvent> eventBiConsumer;
 
+    public ConnectionChannelHandler(BiConsumer<ChannelHandlerContext, IdleStateEvent> eventBiConsumer) {
+        this.eventBiConsumer = eventBiConsumer;
+    }
+
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);

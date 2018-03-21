@@ -32,10 +32,20 @@ import java.util.function.Function;
  */
 public class TcpServer {
 
+    /**
+     * 使用默认配置构建TcpServer
+     * @param port
+     * @return
+     */
     public static TcpServer create(int port) {
         return options().port(port).build();
     }
 
+    /**
+     * 自定义配置构建TcpServer
+     * @param optionsConsumer
+     * @return
+     */
     public static TcpServer create(Consumer<Options> optionsConsumer) {
         Options options = options();
         if (Objects.nonNull(optionsConsumer)) {
@@ -50,6 +60,9 @@ public class TcpServer {
     private Consumer<Throwable> exceptionConsumer;
     private BiConsumer<ChannelHandlerContext, IdleStateEvent> eventBiConsumer;
 
+    /**
+     * 服务启动配置实例
+     */
     private TcpServer.Options options;
 
     public TcpServer(TcpServer.Options options) {
@@ -67,18 +80,27 @@ public class TcpServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
+                            //异常统一处理
                             ch.pipeline().addLast(ExceptionHandler.class.getSimpleName(), new ExceptionHandler(exceptionConsumer));
+                            //读写超时处理，用户判断心跳超时
                             ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(), new IdleStateHandler(options.readIdle, options.writeIdle, options.allIdle, TimeUnit.SECONDS));
-                            ch.pipeline().addLast(ConnectionChannelHandler.class.getSimpleName(), new ConnectionChannelHandler());
+                            //链接处理，链接断开，读写超时事件捕获
+                            ch.pipeline().addLast(ConnectionChannelHandler.class.getSimpleName(), new ConnectionChannelHandler(eventBiConsumer));
+                            //基于帧长度的解析器
                             ch.pipeline().addLast(LengthFieldBasedFrameDecoder.class.getSimpleName(), new LengthFieldBasedFrameDecoder(options.frameMaxLength, options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment, options.lengthInitialBytes));
+                            //基于帧长度的编码器
                             ch.pipeline().addLast(LengthFieldBasedFrameEncoder.class.getSimpleName(), new LengthFieldBasedFrameEncoder(options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment));
+                            //校验处理器
                             if (Objects.nonNull(options.frameChecker)) {
                                 ch.pipeline().addLast("FrameChecker", options.frameChecker);
                             }
+                            //指令解析器
                             ch.pipeline().addLast(DirectiveCodec.class.getSimpleName(), new DirectiveCodec(options.directiveOffset, options.directiveLength, options.directiveFunction));
+                            //指令处理集合
                             if (Objects.nonNull(options.frameInboundHandler)) {
                                 options.frameInboundHandler.forEach(inboundHandler -> ch.pipeline().addLast(inboundHandler));
                             }
+                            //其他管道处理
                             if (pipelineConsumer != null) {
                                 pipelineConsumer.accept(ch.pipeline());
                             }
@@ -87,6 +109,7 @@ public class TcpServer {
                     .option(ChannelOption.SO_BACKLOG, options.backlog)
                     .childOption(ChannelOption.SO_KEEPALIVE, options.keepalive);
 
+            //启动任务超时计时器
             TaskContext.getInstance().start();
             ChannelFuture f = bootstrap.bind(options.port).sync();
 
@@ -164,6 +187,7 @@ public class TcpServer {
         public int directiveLength = 0;
         public Function<Integer, Object> directiveFunction;
 
+        //读写数据的字节序
         public static ByteOrder DEFAULT_BYTEORDER = ByteOrder.BIG_ENDIAN;
 
         public Collection<GenericObjectChannelInboundHandler> frameInboundHandler;

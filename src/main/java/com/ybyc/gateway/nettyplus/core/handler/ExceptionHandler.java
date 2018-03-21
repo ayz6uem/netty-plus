@@ -2,6 +2,8 @@ package com.ybyc.gateway.nettyplus.core.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -12,6 +14,8 @@ import java.util.function.Consumer;
  */
 public class ExceptionHandler extends ChannelInboundHandlerAdapter {
 
+    Logger logger = LoggerFactory.getLogger(this.getClass());
+
     Consumer<Throwable> exceptionConsumer;
 
     public ExceptionHandler(Consumer<Throwable> exceptionConsumer) {
@@ -20,6 +24,7 @@ public class ExceptionHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        logger.error(cause.getMessage(),cause);
         if(Objects.nonNull(exceptionConsumer)){
             exceptionConsumer.accept(cause);
         }

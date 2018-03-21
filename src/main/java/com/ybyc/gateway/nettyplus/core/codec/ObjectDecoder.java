@@ -23,7 +23,7 @@ import java.util.Objects;
  * <p>
  * 1 查找要decode 的属性
  * 2 判断属性的类型 基本类型 字符串 数组（基本类型 字符串（不支持） 扩展类） 集合 泛型类 扩展类
- * 3 不要支持 bit读取，只支持byte读取；支持hexString 和binaryString的解析。
+ * 3 不支持 bit读取，只支持byte读取；支持hexString 和binaryString的解析。
  *
  * @author wangzhe
  */

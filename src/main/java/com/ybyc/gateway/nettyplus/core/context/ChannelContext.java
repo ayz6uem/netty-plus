@@ -18,7 +18,7 @@ import java.util.function.BiConsumer;
  */
 public class ChannelContext {
 
-    public static final String BIZ_ID = "bizId";
+    public static final String BIZ_ID = "_bizId";
     public static final AttributeKey<Object> BIZ_ID_KEY = AttributeKey.newInstance(BIZ_ID);
 
     private static ChannelContext instance;
