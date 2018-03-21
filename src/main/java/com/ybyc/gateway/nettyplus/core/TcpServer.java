@@ -67,15 +67,15 @@ public class TcpServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast("ExceptionHandler", new ExceptionHandler(exceptionConsumer));
-                            ch.pipeline().addLast("IdleStateHandler", new IdleStateHandler(options.readIdle, options.writeIdle, options.allIdle, TimeUnit.SECONDS));
-                            ch.pipeline().addLast("ConnectionChannelHandler", new ConnectionChannelHandler());
-                            ch.pipeline().addLast("LengthFieldBasedFrameDecoder", new LengthFieldBasedFrameDecoder(options.frameMaxLength, options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment, options.lengthInitialBytes));
-                            ch.pipeline().addLast("LengthFieldBasedFrameEncoder", new LengthFieldBasedFrameEncoder(options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment));
+                            ch.pipeline().addLast(ExceptionHandler.class.getSimpleName(), new ExceptionHandler(exceptionConsumer));
+                            ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(), new IdleStateHandler(options.readIdle, options.writeIdle, options.allIdle, TimeUnit.SECONDS));
+                            ch.pipeline().addLast(ConnectionChannelHandler.class.getSimpleName(), new ConnectionChannelHandler());
+                            ch.pipeline().addLast(LengthFieldBasedFrameDecoder.class.getSimpleName(), new LengthFieldBasedFrameDecoder(options.frameMaxLength, options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment, options.lengthInitialBytes));
+                            ch.pipeline().addLast(LengthFieldBasedFrameEncoder.class.getSimpleName(), new LengthFieldBasedFrameEncoder(options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment));
                             if (Objects.nonNull(options.frameChecker)) {
                                 ch.pipeline().addLast("FrameChecker", options.frameChecker);
                             }
-                            ch.pipeline().addLast("DirectiveCodec", new DirectiveCodec(options.directiveOffset, options.directiveLength, options.directiveFunction){});
+                            ch.pipeline().addLast(DirectiveCodec.class.getSimpleName(), new DirectiveCodec(options.directiveOffset, options.directiveLength, options.directiveFunction));
                             if (Objects.nonNull(options.frameInboundHandler)) {
                                 options.frameInboundHandler.forEach(inboundHandler -> ch.pipeline().addLast(inboundHandler));
                             }

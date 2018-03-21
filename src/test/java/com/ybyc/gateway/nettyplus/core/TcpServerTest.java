@@ -37,7 +37,7 @@ public class TcpServerTest {
                     .onPipeline(
                             pipeline ->
                                     pipeline
-                                            .addLast(new DirectiveCodec<Message>(messageCreator) {})
+                                            .addLast(new DirectiveCodec(messageCreator))
                                             .addLast(new HeartHandler())
                     )
                     .onStart(ch ->{
@@ -79,7 +79,7 @@ public class TcpServerTest {
                 @Override
                 public void initChannel(SocketChannel ch) throws Exception {
                     ch.pipeline()
-                            .addLast(new DirectiveCodec<Message>(directive->{return null;}){})
+                            .addLast(new DirectiveCodec(directive->{return null;}){})
                             .addLast(new ClientHandler());
                 }
             });
