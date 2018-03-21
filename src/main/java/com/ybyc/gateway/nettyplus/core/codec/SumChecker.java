@@ -4,6 +4,7 @@ import com.ybyc.gateway.nettyplus.core.exception.BytesCheckException;
 import com.ybyc.gateway.nettyplus.core.util.SumHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
 import org.slf4j.Logger;
@@ -17,9 +18,8 @@ import java.util.List;
  *
  * @author wangzhe
  */
+@ChannelHandler.Sharable
 public class SumChecker extends MessageToMessageCodec<ByteBuf, ByteBuf> {
-
-    Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private int bytesOffset = 0;
     private int checkByteIndex = -1;

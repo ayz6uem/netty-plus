@@ -18,8 +18,6 @@ import java.util.function.Function;
  */
 public class DirectiveCodec<T> extends MessageToMessageCodec<ByteBuf,T> {
 
-    Logger logger = LoggerFactory.getLogger(this.getClass());
-
     public static final int DEFAULT_OFFSET = 0;
     public static final int DEFAULT_LENGTH = 1;
 

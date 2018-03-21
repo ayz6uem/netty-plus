@@ -4,6 +4,7 @@ import com.ybyc.gateway.nettyplus.core.exception.BytesCheckException;
 import com.ybyc.gateway.nettyplus.core.util.Crc16Helper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
 
@@ -16,6 +17,7 @@ import java.util.List;
  *
  * @author wangzhe
  */
+@ChannelHandler.Sharable
 public class Crc16Checker extends MessageToMessageCodec<ByteBuf, ByteBuf> {
 
     private int bytesOffset = 0;
