@@ -96,6 +96,9 @@ public class TcpServer {
                             }
                             //指令解析器
                             ch.pipeline().addLast(DirectiveCodec.class.getSimpleName(), new DirectiveCodec(options.directiveOffset, options.directiveLength, options.directiveFunction));
+                            if(Objects.nonNull(options.frameLogRecord)){
+                                ch.pipeline().addLast(options.frameLogRecord);
+                            }
                             //指令处理集合
                             if (Objects.nonNull(options.frameInboundHandler)) {
                                 options.frameInboundHandler.forEach(inboundHandler -> ch.pipeline().addLast(inboundHandler));
@@ -182,9 +185,10 @@ public class TcpServer {
         public int lengthInitialBytes = 0;
 
         public MessageToMessageCodec frameChecker;
+        public MessageToMessageCodec frameLogRecord;
 
         public int directiveOffset = 0;
-        public int directiveLength = 0;
+        public int directiveLength = 1;
         public Function<Integer, Object> directiveFunction;
 
         //读写数据的字节序
@@ -241,6 +245,10 @@ public class TcpServer {
             return this;
         }
 
+        public Options directiveCodec(int directiveOffset, Function<Integer, Object> directiveFunction) {
+            return directiveCodec(directiveOffset,this.directiveLength,directiveFunction);
+        }
+
         public Options directiveCodec(int directiveOffset, int directiveLength, Function<Integer, Object> directiveFunction) {
             this.directiveOffset = directiveOffset;
             this.directiveLength = directiveLength;
@@ -250,6 +258,11 @@ public class TcpServer {
 
         public Options frameInboundHandler(Collection<GenericObjectChannelInboundHandler> frameInboundHandler) {
             this.frameInboundHandler = frameInboundHandler;
+            return this;
+        }
+
+        public Options frameLogRecord(MessageToMessageCodec frameLogRecord) {
+            this.frameLogRecord = frameLogRecord;
             return this;
         }
 
