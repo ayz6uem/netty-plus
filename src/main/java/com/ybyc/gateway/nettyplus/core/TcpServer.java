@@ -75,7 +75,7 @@ public class TcpServer {
                             if (Objects.nonNull(options.frameChecker)) {
                                 ch.pipeline().addLast("FrameChecker", options.frameChecker);
                             }
-                            ch.pipeline().addLast("DirectiveCodec", new DirectiveCodec(options.directiveOffset, options.directiveLength, options.directiveFunction));
+                            ch.pipeline().addLast("DirectiveCodec", new DirectiveCodec(options.directiveOffset, options.directiveLength, options.directiveFunction){});
                             if (Objects.nonNull(options.frameInboundHandler)) {
                                 options.frameInboundHandler.forEach(inboundHandler -> ch.pipeline().addLast(inboundHandler));
                             }
