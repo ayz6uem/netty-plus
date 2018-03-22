@@ -87,7 +87,7 @@ public class TcpServer {
                             //链接处理，链接断开，读写超时事件捕获
                             ch.pipeline().addLast(ConnectionChannelHandler.class.getSimpleName(), new ConnectionChannelHandler(eventBiConsumer));
                             //基于帧长度的解析器
-                            ch.pipeline().addLast(LengthFieldBasedFrameDecoder.class.getSimpleName(), new LengthFieldBasedFrameDecoder(options.frameMaxLength, options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment, options.lengthInitialBytes));
+                            ch.pipeline().addLast(LengthFieldBasedFrameDecoder.class.getSimpleName(), new LengthFieldBasedFrameDecoder(options.DEFAULT_BYTEORDER,options.frameMaxLength, options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment, options.lengthInitialBytes,true));
                             //基于帧长度的编码器
                             ch.pipeline().addLast(LengthFieldBasedFrameEncoder.class.getSimpleName(), new LengthFieldBasedFrameEncoder(options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment));
                             //校验处理器
