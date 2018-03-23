@@ -33,8 +33,15 @@ public class ObjectDecoder {
 
     private ByteBuf byteBuf;
 
+    private ByteOrder byteOrder = TcpServer.Options.DEFAULT_BYTEORDER;
+
     public ObjectDecoder(ByteBuf byteBuf) {
         this.byteBuf = byteBuf;
+    }
+
+    private ObjectDecoder setByteOrder(ByteOrder byteOrder){
+        this.byteOrder = byteOrder;
+        return this;
     }
 
     public <T> T decode(T template) {
@@ -78,7 +85,7 @@ public class ObjectDecoder {
     private Object decodePrimitive(Class<?> fieldClass, Option option) throws Exception {
         return ByteBufHelper.readPrimitive(byteBuf
                 , option != null ? option.value() : ReflectHelper.primitiveBytes(fieldClass)
-                , TcpServer.Options.DEFAULT_BYTEORDER
+                , byteOrder
                 , option != null && option.unsigned());
     }
 
@@ -101,7 +108,7 @@ public class ObjectDecoder {
             Object value;
             if (ReflectHelper.isPrimitive(componentClass)) {
                 int bytes = ReflectHelper.primitiveBytes(componentClass);
-                value = ByteBufHelper.readPrimitive(byteBuf, bytes, TcpServer.Options.DEFAULT_BYTEORDER, false);
+                value = ByteBufHelper.readPrimitive(byteBuf, bytes, byteOrder, false);
             } else {
                 value = new ObjectDecoder(byteBuf).decode(componentClass.newInstance());
             }
@@ -124,7 +131,7 @@ public class ObjectDecoder {
         while (length == -1 || (index++) < length) {
             if (ReflectHelper.isPrimitive(componentClass)) {
                 int bytes = ReflectHelper.primitiveBytes(componentClass);
-                collection.add(ByteBufHelper.readPrimitive(byteBuf, bytes, TcpServer.Options.DEFAULT_BYTEORDER, false));
+                collection.add(ByteBufHelper.readPrimitive(byteBuf, bytes, byteOrder, false));
             } else {
                 collection.add(new ObjectDecoder(byteBuf).decode(componentClass.newInstance()));
             }
