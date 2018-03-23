@@ -86,30 +86,30 @@ public class TaskContext {
     /**
      * 唤醒等待方
      *
-     * @param channelHandlerContext
+     * @param channel
      * @param id
      * @param result
      */
-    public void wakeup(ChannelHandlerContext channelHandlerContext, Object id, Object result) {
+    public void wakeup(Channel channel, Object id, Object result) {
         if(Objects.nonNull(id)){
             Task task = taskPool.remove(id);
             if (task != null) {
                 task.timeout.cancel();
-                task.success(channelHandlerContext, result);
+                task.success(channel, result);
             }
         }
     }
 
-    public void wakeup(ChannelHandlerContext channelHandlerContext, Object result) {
-        wakeup(channelHandlerContext, ChannelContext.getId(channelHandlerContext.channel()), result);
+    public void wakeup(Channel channel, Object result) {
+        wakeup(channel, ChannelContext.getId(channel), result);
     }
 
-    public void wakeup(ChannelHandlerContext channelHandlerContext, Object id, Object directive, Object result) {
-        wakeup(channelHandlerContext, Tuples.of(id, directive), result);
+    public void wakeup(Channel channel, Object id, Object directive, Object result) {
+        wakeup(channel, Tuples.of(id, directive), result);
     }
 
-    public void wakeup(ChannelHandlerContext channelHandlerContext, Object id, Object directive, Object msgId, Object result) {
-        wakeup(channelHandlerContext, Tuples.of(id, directive, msgId), result);
+    public void wakeup(Channel channel, Object id, Object directive, Object msgId, Object result) {
+        wakeup(channel, Tuples.of(id, directive, msgId), result);
     }
 
     /**
@@ -162,7 +162,7 @@ public class TaskContext {
         private Object resultId;
         private Consumer<Channel> preTask;
         private Supplier<Object> postTask;
-        private BiConsumer<ChannelHandlerContext, T> successTask;
+        private BiConsumer<Channel, T> successTask;
         private MonoSink<T> sink;
         private Timeout timeout;
 
@@ -170,9 +170,9 @@ public class TaskContext {
             uid = TimeIdHelper.get();
         }
 
-        public void success(ChannelHandlerContext channelHandlerContext, T data) {
+        public void success(Channel channel, T data) {
             if (successTask != null) {
-                successTask.accept(channelHandlerContext, data);
+                successTask.accept(channel, data);
             }
             sink.success(data);
         }
@@ -256,7 +256,7 @@ public class TaskContext {
                 return this;
             }
 
-            public TaskBuilder<T> success(BiConsumer<ChannelHandlerContext, T> successTask) {
+            public TaskBuilder<T> success(BiConsumer<Channel, T> successTask) {
                 task.successTask = successTask;
                 return this;
             }
