@@ -4,6 +4,7 @@ import com.ybyc.gateway.nettyplus.core.codec.DirectiveCodec;
 import com.ybyc.gateway.nettyplus.core.codec.LengthFieldBasedFrameEncoder;
 import com.ybyc.gateway.nettyplus.core.context.ChannelContext;
 import com.ybyc.gateway.nettyplus.core.context.TaskContext;
+import com.ybyc.gateway.nettyplus.core.handler.BytesHandler;
 import com.ybyc.gateway.nettyplus.core.handler.ConnectionChannelHandler;
 import com.ybyc.gateway.nettyplus.core.handler.ExceptionHandler;
 import com.ybyc.gateway.nettyplus.core.handler.GenericObjectChannelInboundHandler;
@@ -88,6 +89,9 @@ public class TcpServer {
                             ch.pipeline().addLast(ConnectionChannelHandler.class.getSimpleName(), new ConnectionChannelHandler(eventBiConsumer));
                             //基于帧长度的解析器
                             ch.pipeline().addLast(LengthFieldBasedFrameDecoder.class.getSimpleName(), new LengthFieldBasedFrameDecoder(Options.DEFAULT_BYTEORDER,options.frameMaxLength, options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment, options.lengthInitialBytes,true));
+                            if(options.printBytes){
+                                ch.pipeline().addLast(BytesHandler.class.getSimpleName(), new BytesHandler());
+                            }
                             //基于帧长度的编码器
                             ch.pipeline().addLast(LengthFieldBasedFrameEncoder.class.getSimpleName(), new LengthFieldBasedFrameEncoder(options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment));
                             //校验处理器
@@ -191,6 +195,8 @@ public class TcpServer {
         public int directiveLength = 1;
         public Function<Integer, Object> directiveFunction;
 
+        public boolean printBytes = false;
+
         //读写数据的字节序
         public static ByteOrder DEFAULT_BYTEORDER = ByteOrder.BIG_ENDIAN;
 
@@ -263,6 +269,11 @@ public class TcpServer {
 
         public Options frameLogRecord(MessageToMessageCodec frameLogRecord) {
             this.frameLogRecord = frameLogRecord;
+            return this;
+        }
+
+        public Options printBytes(boolean printBytes) {
+            this.printBytes = printBytes;
             return this;
         }
 
