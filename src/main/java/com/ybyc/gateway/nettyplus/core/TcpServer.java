@@ -92,12 +92,13 @@ public class TcpServer {
                             if(options.printBytes){
                                 ch.pipeline().addLast(BytesHandler.class.getSimpleName(), new BytesHandler());
                             }
-                            //基于帧长度的编码器
-                            ch.pipeline().addLast(LengthFieldBasedFrameEncoder.class.getSimpleName(), new LengthFieldBasedFrameEncoder(options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment));
                             //校验处理器
                             if (Objects.nonNull(options.frameChecker)) {
                                 ch.pipeline().addLast("FrameChecker", options.frameChecker);
                             }
+                            //基于帧长度的编码器
+                            ch.pipeline().addLast(LengthFieldBasedFrameEncoder.class.getSimpleName(), new LengthFieldBasedFrameEncoder(options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment));
+
                             //指令解析器
                             ch.pipeline().addLast(DirectiveCodec.class.getSimpleName(), new DirectiveCodec(options.directiveOffset, options.directiveLength, options.directiveFunction));
                             if(Objects.nonNull(options.frameLogRecord)){
