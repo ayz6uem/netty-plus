@@ -49,7 +49,7 @@ public class Crc16Checker extends MessageToMessageCodec<ByteBuf, ByteBuf> {
         short loopCrc = (short) Crc16Helper.loop(msg, bytesOffset, msg.readableBytes() + checkByteIndex);
         short crc = msg.getShort(msg.readableBytes() + checkByteIndex);
         if (loopCrc != crc) {
-            throw new BytesCheckException("error check loop:" + loopCrc + " crc:" + crc + ByteBufUtil.hexDump(msg).toUpperCase());
+            throw new BytesCheckException("error check loop:" + loopCrc + " crc:" + crc +" bytes:" + ByteBufUtil.hexDump(msg).toUpperCase());
         }
         out.add(msg);
     }
