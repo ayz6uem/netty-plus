@@ -5,6 +5,7 @@ import com.ybyc.gateway.nettyplus.core.util.Assert;
 import io.netty.channel.Channel;
 import io.netty.util.AttributeKey;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -83,6 +84,10 @@ public class ChannelContext {
 
     public Set<Object> keys(){
         return channelMap.keySet();
+    }
+
+    public Iterator<Map.Entry<Object,Channel>> iterator(){
+        return channelMap.entrySet().iterator();
     }
 
     public int size(){
