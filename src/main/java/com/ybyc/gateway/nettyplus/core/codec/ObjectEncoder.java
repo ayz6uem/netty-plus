@@ -33,7 +33,7 @@ public class ObjectEncoder {
 
     private ByteOrder byteOrder = TcpServer.Options.DEFAULT_BYTEORDER;
 
-    private ObjectEncoder setByteOrder(ByteOrder byteOrder){
+    public ObjectEncoder byteOrder(ByteOrder byteOrder){
         this.byteOrder = byteOrder;
         return this;
     }

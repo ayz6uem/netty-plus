@@ -9,6 +9,7 @@ import io.netty.handler.codec.MessageToMessageCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.ByteOrder;
 import java.util.List;
 import java.util.function.Function;
 
@@ -23,7 +24,9 @@ public class DirectiveCodec extends MessageToMessageCodec<ByteBuf,Object> {
 
     private int directiveOffset;
     private int directiveLength;
-    private Function<Integer,Object> messageCreator;
+    private Function<Integer,Object> directiveFunction;
+
+    private ByteOrder byteOrder;
 
     public DirectiveCodec(Function<Integer,Object> messageCreator) {
         this(DEFAULT_OFFSET,messageCreator);
@@ -33,26 +36,30 @@ public class DirectiveCodec extends MessageToMessageCodec<ByteBuf,Object> {
         this(directiveIndex,DEFAULT_LENGTH,messageCreator);
     }
 
-    public DirectiveCodec(int directiveOffset, int directiveLength, Function<Integer,Object> messageCreator) {
-        if(messageCreator==null){
+    public DirectiveCodec(int directiveOffset, int directiveLength, Function<Integer,Object> directiveFunction) {
+        this(TcpServer.Options.DEFAULT_BYTEORDER,directiveOffset,directiveLength,directiveFunction);
+    }
+    public DirectiveCodec(ByteOrder byteOrder, int directiveOffset, int directiveLength, Function<Integer,Object> directiveFunction) {
+        if(directiveFunction==null){
             throw new NullPointerException("messageCreator can not be null");
         }
+        this.byteOrder = byteOrder;
         this.directiveOffset = directiveOffset;
         this.directiveLength = directiveLength;
-        this.messageCreator = messageCreator;
+        this.directiveFunction = directiveFunction;
     }
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
-        ByteBuf byteBuf = ObjectCodec.just(msg).encode();
+        ByteBuf byteBuf = ObjectCodec.just(msg).byteOrder(byteOrder).encode();
         out.add(byteBuf);
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         int directive = ByteBufHelper.get(msg, directiveOffset, directiveLength, TcpServer.Options.DEFAULT_BYTEORDER).intValue();
-        Object message = messageCreator.apply(directive);
-        message = ObjectCodec.just(msg).decode(message);
+        Object message = directiveFunction.apply(directive);
+        message = ObjectCodec.just(msg).byteOrder(byteOrder).decode(message);
         out.add(message);
     }
 }

@@ -39,7 +39,7 @@ public class ObjectDecoder {
         this.byteBuf = byteBuf;
     }
 
-    private ObjectDecoder setByteOrder(ByteOrder byteOrder){
+    public ObjectDecoder byteOrder(ByteOrder byteOrder){
         this.byteOrder = byteOrder;
         return this;
     }
