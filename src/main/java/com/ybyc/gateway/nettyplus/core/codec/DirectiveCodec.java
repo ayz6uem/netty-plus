@@ -51,8 +51,14 @@ public class DirectiveCodec extends MessageToMessageCodec<ByteBuf,Object> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
-        ByteBuf byteBuf = ObjectCodec.just(msg).byteOrder(byteOrder).encode();
-        out.add(byteBuf);
+        if(msg instanceof ByteBuf){
+            ByteBuf buf = (ByteBuf)msg;
+            buf.retain();
+            out.add(buf);
+        }else{
+            ByteBuf byteBuf = ObjectCodec.just(msg).byteOrder(byteOrder).encode();
+            out.add(byteBuf);
+        }
     }
 
     @Override
