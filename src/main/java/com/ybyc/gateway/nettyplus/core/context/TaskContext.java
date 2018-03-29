@@ -90,7 +90,7 @@ public class TaskContext {
      * @param id
      * @param result
      */
-    public void wakeup(Channel channel, Object id, Object result) {
+    public void wakeup(Object id, Channel channel, Object result) {
         if(Objects.nonNull(id)){
             Task task = taskPool.remove(id);
             if (task != null) {
@@ -101,15 +101,18 @@ public class TaskContext {
     }
 
     public void wakeup(Channel channel, Object result) {
-        wakeup(channel, ChannelContext.getId(channel), result);
+        wakeup(ChannelContext.getId(channel), channel, result);
     }
 
-    public void wakeup(Channel channel, Object id, Object directive, Object result) {
-        wakeup(channel, Tuples.of(id, directive), result);
+    public void wakeup(Channel channel, Object directive, Object result) {
+        wakeup(ChannelContext.getId(channel),channel,directive,result);
+    }
+    public void wakeup(Object id, Channel channel, Object directive, Object result) {
+        wakeup(Tuples.of(id, directive), channel, result);
     }
 
-    public void wakeup(Channel channel, Object id, Object directive, Object msgId, Object result) {
-        wakeup(channel, Tuples.of(id, directive, msgId), result);
+    public void wakeup(Object id, Channel channel, Object directive, Object msgId, Object result) {
+        wakeup(Tuples.of(id, directive, msgId), channel, result);
     }
 
     /**
