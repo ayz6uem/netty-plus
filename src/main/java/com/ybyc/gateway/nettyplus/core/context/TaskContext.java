@@ -75,6 +75,12 @@ public class TaskContext {
      * @param task
      */
     private void await(Object resultId, Task task) {
+        if (taskPool.containsKey(resultId)) {
+            Task oldTask = taskPool.get(resultId);
+            if(oldTask.end.isBefore(LocalDateTime.now())){
+                cancel(resultId);
+            }
+        }
         if (!taskPool.containsKey(resultId)) {
             task.timeout =  wheelTimer.newTimeout(task,timeout, TimeUnit.SECONDS);
             taskPool.put(resultId, task);
@@ -160,6 +166,7 @@ public class TaskContext {
     public static class Task<T> implements TimerTask {
 
         private LocalDateTime start;
+        private LocalDateTime end;
         private String uid;
         private Object id;
         private Object resultId;
@@ -192,6 +199,7 @@ public class TaskContext {
                         TaskContext.getInstance().await(resultId, Task.this);
 
                         Task.this.start = LocalDateTime.now();
+                        Task.this.end = LocalDateTime.now().plusSeconds(TaskContext.timeout);
                         Task.this.sink = sink;
 
                         if (Objects.nonNull(preTask)) {
@@ -204,12 +212,13 @@ public class TaskContext {
                         if(error instanceof TaskExecutingException){
                             throw (TaskExecutingException)error;
                         }
+                        if(error instanceof TimeoutException){
+                            throw (TimeoutException)error;
+                        }
+                        
                         TaskContext.getInstance().cancel(resultId);
                         if(error instanceof ChannelNotFoundException){
                             throw (ChannelNotFoundException)error;
-                        }
-                        if(error instanceof TimeoutException){
-                            throw (TimeoutException)error;
                         }
                         throw new RuntimeException(error.getMessage(), error);
                     });
@@ -217,6 +226,9 @@ public class TaskContext {
 
         @Override
         public void run(Timeout timeout) throws Exception {
+            //超时移除任务
+            TaskContext.getInstance().cancel(resultId);
+
             if(!timeout.isCancelled()){
                 sink.error(new TimeoutException("task timeout"));
             }
@@ -288,6 +300,10 @@ public class TaskContext {
 
         public LocalDateTime getStart() {
             return start;
+        }
+
+        public LocalDateTime getEnd() {
+            return end;
         }
     }
 
