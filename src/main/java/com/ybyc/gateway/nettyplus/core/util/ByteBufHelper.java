@@ -357,6 +357,17 @@ public class ByteBufHelper {
         return result.toString();
     }
 
+
+    public static String binaryDump(ByteBuf buf) {
+        StringBuffer result=new StringBuffer();
+        for(int i=0;i<buf.readableBytes();i++){
+            for(int j=0;j<Byte.SIZE;j++){
+                result.append(Integer.toBinaryString(((buf.getByte(i) << j) & 0xff) >>> Byte.SIZE-1));
+            }
+        }
+        return result.toString();
+    }
+
     public static byte[] decodeBinaryDump(String value) {
         char[] chars=value.toCharArray();
         int length = chars.length%Byte.SIZE==0?chars.length/Byte.SIZE:chars.length/Byte.SIZE+1;

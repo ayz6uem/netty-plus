@@ -5,6 +5,7 @@ import com.ybyc.gateway.nettyplus.core.option.Option;
 import com.ybyc.gateway.nettyplus.core.option.StringOption;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.util.ReferenceCountUtil;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -29,14 +30,20 @@ public class OptionHelper {
 
 
     public static String convertToString(ByteBuf byteBuf, StringOption option, int length) {
+        String result;
+        ByteBuf stringByteBuf = byteBuf.readBytes(length);
         switch (option){
             case HEX:
-                return ByteBufUtil.hexDump(ByteBufUtil.getBytes(byteBuf.readBytes(length))).toUpperCase();
+                result =  ByteBufUtil.hexDump(stringByteBuf).toUpperCase();
+                break;
             case BINARY:
-                return ByteBufHelper.binaryDump(ByteBufUtil.getBytes(byteBuf.readBytes(length)));
+                result =  ByteBufHelper.binaryDump(byteBuf.readBytes(length));
+                break;
             default:
-                return new String(ByteBufUtil.getBytes(byteBuf.readBytes(length)));
+                result = new String(ByteBufUtil.getBytes(stringByteBuf));
         }
+        ReferenceCountUtil.release(stringByteBuf);
+        return result;
     }
 
     public static byte[] convertToBytes(String value, StringOption option) {

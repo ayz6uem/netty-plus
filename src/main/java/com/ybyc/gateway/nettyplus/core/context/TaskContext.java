@@ -215,7 +215,7 @@ public class TaskContext {
                         if(error instanceof TimeoutException){
                             throw (TimeoutException)error;
                         }
-                        
+
                         TaskContext.getInstance().cancel(resultId);
                         if(error instanceof ChannelNotFoundException){
                             throw (ChannelNotFoundException)error;
