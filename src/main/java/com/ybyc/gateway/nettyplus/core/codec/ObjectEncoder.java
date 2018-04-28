@@ -97,7 +97,15 @@ public class ObjectEncoder {
     }
 
     private boolean encodeString(String value,Option option){
-        byte[] bytes = OptionHelper.convertToBytes(value,option.string()!=null?option.string(): StringOption.NATURAL);
+        int length = 0;
+        StringOption stringOption = StringOption.NATURAL;
+        if(Objects.nonNull(option)){
+            length = option.value();
+            if(Objects.nonNull(option.string())){
+                stringOption = option.string();
+            }
+        }
+        byte[] bytes = OptionHelper.convertToBytes(value, length, stringOption);
         byteBuf.writeBytes(bytes);
         return true;
     }

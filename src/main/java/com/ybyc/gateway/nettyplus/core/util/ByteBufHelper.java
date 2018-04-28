@@ -380,4 +380,15 @@ public class ByteBufHelper {
         }
         return result;
     }
+
+    public static byte[] fillBytes(byte[] bytes, int length) {
+        if(bytes==null || bytes.length == length){
+            return bytes;
+        }
+        byte[] result = new byte[length];
+        for(int i=0;i<bytes.length&&i<length;i++){
+            result[i] = bytes[i];
+        }
+        return result;
+    }
 }

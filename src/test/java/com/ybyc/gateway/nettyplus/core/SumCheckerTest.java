@@ -1,10 +1,13 @@
 package com.ybyc.gateway.nettyplus.core;
 
+import com.ybyc.gateway.nettyplus.core.util.ByteBufHelper;
 import com.ybyc.gateway.nettyplus.core.util.SumHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 public class SumCheckerTest {
 
@@ -17,6 +20,15 @@ public class SumCheckerTest {
 
         System.out.println("loopSum:"+loopSum);
         System.out.println("sum:"+sum);
+    }
+
+    @Test
+    public void test2(){
+
+        byte[] bytes = new byte[]{1,2,3};
+
+        System.out.println(Arrays.toString(ByteBufHelper.fillBytes(bytes,32)));
+
     }
 
 }

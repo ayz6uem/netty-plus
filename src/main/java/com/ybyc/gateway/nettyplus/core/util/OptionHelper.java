@@ -43,21 +43,28 @@ public class OptionHelper {
                 result = new String(ByteBufUtil.getBytes(stringByteBuf));
         }
         ReferenceCountUtil.release(stringByteBuf);
-        return result;
+        return result.trim();
     }
 
-    public static byte[] convertToBytes(String value, StringOption option) {
+    public static byte[] convertToBytes(String value, int length, StringOption option) {
+        byte[] result;
         switch (option){
             case HEX:
                 if(value.length()%2==1){
                     value = "0"+value;
                 }
-                return ByteBufUtil.decodeHexDump(value);
+                result = ByteBufUtil.decodeHexDump(value);
+                break;
             case BINARY:
-                return ByteBufHelper.decodeBinaryDump(value);
+                result = ByteBufHelper.decodeBinaryDump(value);
+                break;
             default:
-                return value.getBytes();
+                result = value.getBytes();
         }
+        if(length!=0){
+            result = ByteBufHelper.fillBytes(result,length);
+        }
+        return result;
     }
 
     public static <T> Class<?> getActualClass(T template, Option option) throws ClassNotFoundException {

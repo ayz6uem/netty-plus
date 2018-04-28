@@ -5,7 +5,6 @@ import com.ybyc.gateway.nettyplus.core.exception.TaskExecutingException;
 import com.ybyc.gateway.nettyplus.core.exception.TimeoutException;
 import com.ybyc.gateway.nettyplus.core.util.TimeIdHelper;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
@@ -53,11 +52,11 @@ public class TaskContext {
         return instance;
     }
 
-    public void start(){
+    public void start() {
         wheelTimer.start();
     }
 
-    public void stop(){
+    public void stop() {
         wheelTimer.stop();
     }
 
@@ -77,12 +76,12 @@ public class TaskContext {
     private void await(Object resultId, Task task) {
         if (taskPool.containsKey(resultId)) {
             Task oldTask = taskPool.get(resultId);
-            if(oldTask.end.isBefore(LocalDateTime.now())){
+            if (oldTask.end.isBefore(LocalDateTime.now())) {
                 cancel(resultId);
             }
         }
         if (!taskPool.containsKey(resultId)) {
-            task.timeout =  wheelTimer.newTimeout(task,timeout, TimeUnit.SECONDS);
+            task.timeout = wheelTimer.newTimeout(task, timeout, TimeUnit.SECONDS);
             taskPool.put(resultId, task);
             return;
         }
@@ -97,7 +96,7 @@ public class TaskContext {
      * @param result
      */
     public void wakeup(Object id, Channel channel, Object result) {
-        if(Objects.nonNull(id)){
+        if (Objects.nonNull(id)) {
             Task task = taskPool.remove(id);
             if (task != null) {
                 task.timeout.cancel();
@@ -111,14 +110,19 @@ public class TaskContext {
     }
 
     public void wakeup(Channel channel, Object directive, Object result) {
-        wakeup(ChannelContext.getId(channel),channel,directive,result);
+        wakeup(ChannelContext.getId(channel), channel, directive, result);
     }
+
     public void wakeup(Object id, Channel channel, Object directive, Object result) {
-        wakeup(Tuples.of(id, directive), channel, result);
+        if (Objects.nonNull(id) && Objects.nonNull(directive)) {
+            wakeup(Tuples.of(id, directive), channel, result);
+        }
     }
 
     public void wakeup(Object id, Channel channel, Object directive, Object msgId, Object result) {
-        wakeup(Tuples.of(id, directive, msgId), channel, result);
+        if (Objects.nonNull(id) && Objects.nonNull(directive) && Objects.nonNull(msgId)) {
+            wakeup(Tuples.of(id, directive, msgId), channel, result);
+        }
     }
 
     /**
@@ -128,7 +132,7 @@ public class TaskContext {
      */
     public Task cancel(Object resultId) {
         Task task = taskPool.remove(resultId);
-        if(Objects.nonNull(task) && !task.timeout.isCancelled()){
+        if (Objects.nonNull(task) && !task.timeout.isCancelled()) {
             task.timeout.cancel();
         }
         return task;
@@ -136,13 +140,14 @@ public class TaskContext {
 
     /**
      * 获取任务池中的任务
+     *
      * @return
      */
-    public Map<Object,Task> getTaskPool(){
+    public Map<Object, Task> getTaskPool() {
         return taskPool;
     }
 
-    public int size(){
+    public int size() {
         return taskPool.size();
     }
 
@@ -209,16 +214,16 @@ public class TaskContext {
                         }
                     })
                     .doOnError(error -> {
-                        if(error instanceof TaskExecutingException){
-                            throw (TaskExecutingException)error;
+                        if (error instanceof TaskExecutingException) {
+                            throw (TaskExecutingException) error;
                         }
-                        if(error instanceof TimeoutException){
-                            throw (TimeoutException)error;
+                        if (error instanceof TimeoutException) {
+                            throw (TimeoutException) error;
                         }
 
                         TaskContext.getInstance().cancel(resultId);
-                        if(error instanceof ChannelNotFoundException){
-                            throw (ChannelNotFoundException)error;
+                        if (error instanceof ChannelNotFoundException) {
+                            throw (ChannelNotFoundException) error;
                         }
                         throw new RuntimeException(error.getMessage(), error);
                     });
@@ -229,7 +234,7 @@ public class TaskContext {
             //超时移除任务
             TaskContext.getInstance().cancel(resultId);
 
-            if(!timeout.isCancelled()){
+            if (!timeout.isCancelled()) {
                 sink.error(new TimeoutException("task timeout"));
             }
         }
@@ -258,6 +263,7 @@ public class TaskContext {
 
             /**
              * pre优先于post
+             *
              * @param preTask
              * @return
              */
