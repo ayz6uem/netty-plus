@@ -97,4 +97,8 @@ public class ChannelContext {
     public static Object getId(Channel channel) {
         return channel.attr(ChannelContext.BIZ_ID_KEY).get();
     }
+
+    public static boolean isOnline(Channel channel) {
+        return Objects.nonNull(channel.attr(ChannelContext.BIZ_ID_KEY).get());
+    }
 }

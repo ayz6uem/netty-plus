@@ -1,13 +1,11 @@
 package com.ybyc.gateway.nettyplus.core;
 
+import com.ybyc.gateway.nettyplus.core.codec.Directive;
 import com.ybyc.gateway.nettyplus.core.codec.DirectiveCodec;
 import com.ybyc.gateway.nettyplus.core.codec.LengthFieldBasedFrameEncoder;
 import com.ybyc.gateway.nettyplus.core.context.ChannelContext;
 import com.ybyc.gateway.nettyplus.core.context.TaskContext;
-import com.ybyc.gateway.nettyplus.core.handler.BytesHandler;
-import com.ybyc.gateway.nettyplus.core.handler.ConnectionChannelHandler;
-import com.ybyc.gateway.nettyplus.core.handler.ExceptionHandler;
-import com.ybyc.gateway.nettyplus.core.handler.GenericObjectChannelInboundHandler;
+import com.ybyc.gateway.nettyplus.core.handler.*;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -60,6 +58,7 @@ public class TcpServer {
     private Consumer<Object> stoppedSupplier;
     private Consumer<Throwable> exceptionConsumer;
     private BiConsumer<ChannelHandlerContext, IdleStateEvent> eventBiConsumer;
+    private BiConsumer<Channel,Directive> interceptBiConsumer;
 
     /**
      * 服务启动配置实例
@@ -101,6 +100,11 @@ public class TcpServer {
 
                             //指令解析器
                             ch.pipeline().addLast(DirectiveCodec.class.getSimpleName(), new DirectiveCodec(options.directiveOffset, options.directiveLength, options.directiveFunction));
+
+                            if(options.intercept){
+                                ch.pipeline().addLast(new DirectiveInterceptor(interceptBiConsumer,options.excludeDirective));
+                            }
+
                             if(Objects.nonNull(options.frameLogRecord)){
                                 ch.pipeline().addLast(options.frameLogRecord);
                             }
@@ -171,6 +175,12 @@ public class TcpServer {
         return this;
     }
 
+    public TcpServer onIntercept(BiConsumer<Channel, Directive> interceptBiConsumer) {
+        this.interceptBiConsumer = interceptBiConsumer;
+        return this;
+    }
+
+
     public static TcpServer.Options options() {
         return new TcpServer.Options();
     }
@@ -197,6 +207,10 @@ public class TcpServer {
         public Function<Integer, Object> directiveFunction;
 
         public boolean printBytes = false;
+
+        public boolean intercept = false;
+
+        public Object[] excludeDirective;
 
         //读写数据的字节序
         public static ByteOrder DEFAULT_BYTEORDER = ByteOrder.BIG_ENDIAN;
@@ -275,6 +289,12 @@ public class TcpServer {
 
         public Options printBytes(boolean printBytes) {
             this.printBytes = printBytes;
+            return this;
+        }
+
+        public Options intercept(Object ... excludeDirective){
+            this.intercept = true;
+            this.excludeDirective = excludeDirective;
             return this;
         }
 

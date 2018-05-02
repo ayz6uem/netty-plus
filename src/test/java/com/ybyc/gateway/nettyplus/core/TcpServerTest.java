@@ -1,5 +1,6 @@
 package com.ybyc.gateway.nettyplus.core;
 
+import com.ybyc.gateway.nettyplus.core.codec.Directive;
 import com.ybyc.gateway.nettyplus.core.codec.DirectiveCodec;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -24,7 +25,7 @@ public class TcpServerTest {
 
     public void boot() {
         try {
-            Function<Integer, Object> messageCreator = directive -> {
+            Function<Integer, Directive> messageCreator = directive -> {
                 switch (directive.byteValue()) {
                     case 1:
                         return new Message<Heart>(){};

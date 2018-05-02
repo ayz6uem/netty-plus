@@ -1,4 +1,4 @@
-package com.ybyc.gateway.nettyplus.core.codec;
+package com.ybyc.gateway.nettyplus.core.util;
 
 import io.netty.buffer.ByteBuf;
 
