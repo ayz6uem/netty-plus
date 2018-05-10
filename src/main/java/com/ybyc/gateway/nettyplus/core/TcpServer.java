@@ -15,6 +15,8 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.MessageToMessageCodec;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteOrder;
 import java.util.Collection;
@@ -30,6 +32,8 @@ import java.util.function.Function;
  * @author wangzhe
  */
 public class TcpServer {
+
+    Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 使用默认配置构建TcpServer
@@ -88,7 +92,7 @@ public class TcpServer {
                             ch.pipeline().addLast(ConnectionChannelHandler.class.getSimpleName(), new ConnectionChannelHandler(eventBiConsumer));
                             //基于帧长度的解析器
                             ch.pipeline().addLast(LengthFieldBasedFrameDecoder.class.getSimpleName(), new LengthFieldBasedFrameDecoder(Options.DEFAULT_BYTEORDER,options.frameMaxLength, options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment, options.lengthInitialBytes,true));
-                            if(options.printBytes){
+                            if(options.printBytes || logger.isDebugEnabled()){
                                 ch.pipeline().addLast(BytesHandler.class.getSimpleName(), new BytesHandler());
                             }
                             //校验处理器

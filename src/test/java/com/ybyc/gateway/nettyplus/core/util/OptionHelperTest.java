@@ -15,7 +15,7 @@ public class OptionHelperTest {
         heart.setId(11231);
         message.setFlag((byte)1);
         message.setPayload(heart);
-        boolean c = OptionHelper.containGeneric(message,Heart.class);
+        boolean c = OptionHelper.containClass(message,Heart.class);
         System.out.println(c);
     }
 

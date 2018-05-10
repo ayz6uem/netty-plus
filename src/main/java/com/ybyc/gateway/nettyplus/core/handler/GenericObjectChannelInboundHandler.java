@@ -15,7 +15,7 @@ public abstract class GenericObjectChannelInboundHandler<T,R> extends SimpleChan
     public boolean acceptInboundMessage(Object msg) throws Exception {
         if(super.acceptInboundMessage(msg)){
             Class<?> targetClass = ReflectHelper.getActualClass(this,"R");
-            return OptionHelper.containGeneric(msg,targetClass);
+            return OptionHelper.containClass(msg,targetClass);
         }
         return false;
     }

@@ -1,15 +1,11 @@
 package com.ybyc.gateway.nettyplus.core;
 
-import com.ybyc.gateway.nettyplus.core.codec.Directive;
 import com.ybyc.gateway.nettyplus.core.codec.DirectiveCodec;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.function.Function;
@@ -25,7 +21,7 @@ public class TcpServerTest {
 
     public void boot() {
         try {
-            Function<Integer, Directive> messageCreator = directive -> {
+            Function<Integer, Object> messageCreator = directive -> {
                 switch (directive.byteValue()) {
                     case 1:
                         return new Message<Heart>(){};

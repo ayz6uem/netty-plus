@@ -92,13 +92,17 @@ public class OptionHelper {
         }
     }
 
-    public static boolean containGeneric(Object target, Class<?> targetClass){
+    public static boolean containClass(Object target, Class<?> targetClass){
 
         Collection<Field> collection = ReflectHelper.getDataField(target.getClass());
         Iterator<Field> fields = collection.iterator();
         try {
             while (fields.hasNext()){
                 Field field = fields.next();
+                Object value = field.get(target);
+                if(Objects.nonNull(value) && Objects.equals(value.getClass(),targetClass)){
+                    return true;
+                }
                 if(Object.class.equals(field.getType())){
                     Option option = field.getAnnotation(Option.class);
                     Class<?> componentClass = getFieldActualClass(target,field,option);
@@ -113,69 +117,5 @@ public class OptionHelper {
 
         return false;
     }
-
-//    public static boolean containGeneric(Object target, Class<?> targetClass){
-//
-//        class BooleanHolder{
-//            public boolean value;
-//        }
-//        final BooleanHolder holder = new BooleanHolder();
-//
-//        DoWithField.of(target).with((field,value)->{
-//            if(Object.class.equals(field.getType())){
-//                try {
-//                    Option option = field.getAnnotation(Option.class);
-//                    Class<?> componentClass = getFieldActualClass(target,field,option);
-//                    if(Objects.equals(componentClass,targetClass)){
-//                        holder.value = true;
-//                        return false;
-//                    }
-//                }catch (Exception e){
-//                    e.printStackTrace();
-//                }
-//            }
-//            return true;
-//        });
-//
-//        return holder.value;
-//    }
-//
-//    public static class DoWithField {
-//
-//        Object data;
-//
-//        public static DoWithField of(Object data) {
-//            DoWithField consumer = new DoWithField();
-//            consumer.data=data;
-//            return consumer;
-//        }
-//
-//        public void with(BiFunction<Field,Object,Boolean> classBiConsumer){
-//            with(data.getClass(),classBiConsumer);
-//        }
-//
-//        public boolean with(Class<?> clzz, BiFunction<Field,Object,Boolean> classBiConsumer){
-//            if(Object.class.equals(clzz)){
-//                return true;
-//            }
-//            boolean continued = with(clzz.getSuperclass(),classBiConsumer);
-//
-//            if(continued){
-//                Field[] fields = clzz.getDeclaredFields();
-//                for (int i = 0; i < fields.length; i++) {
-//                    Field field = fields[i];
-//                    continued = classBiConsumer.apply(field,clzz);
-//                    if(!continued){
-//                        return continued;
-//                    }
-//                }
-//
-//            }
-//
-//            return continued;
-//
-//        }
-//
-//    }
 
 }
