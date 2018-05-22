@@ -48,4 +48,6 @@ public @interface Option {
      */
     Class<?> genericClass() default Object.class;
 
+    boolean required() default true;
+
 }

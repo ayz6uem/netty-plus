@@ -48,7 +48,9 @@ public class ObjectDecoder {
             while (fields.hasNext()) {
                 Field field = fields.next();
                 Object value = decode(template, field);
-                field.set(template, value);
+                if(Objects.nonNull(value)){
+                    field.set(template, value);
+                }
             }
         } catch (Exception e) {
             logger.error("decode {} failed, cause:{}", template.getClass().getName(), e.getMessage(), e);
@@ -59,22 +61,29 @@ public class ObjectDecoder {
 
     private <T> Object decode(T template, Field field) throws Exception {
         Option option = field.getAnnotation(Option.class);
-        Class<?> fieldClass = OptionHelper.getFieldActualClass(template, field, option);
+        try{
+            Class<?> fieldClass = OptionHelper.getFieldActualClass(template, field, option);
 
-        if (ReflectHelper.isPrimitive(fieldClass)) {
-            return decodePrimitive(fieldClass, option);
-        }
-        if (Objects.equals(String.class, fieldClass)) {
-            return decodeString(template, option);
-        }
-        if (fieldClass.isArray()) {
-            return decodeArray(template, fieldClass, option);
-        }
-        if (Collection.class.isAssignableFrom(fieldClass)) {
-            return decodeCollection(template, fieldClass, option);
-        }
+            if (ReflectHelper.isPrimitive(fieldClass)) {
+                return decodePrimitive(fieldClass, option);
+            }
+            if (Objects.equals(String.class, fieldClass)) {
+                return decodeString(template, option);
+            }
+            if (fieldClass.isArray()) {
+                return decodeArray(template, fieldClass, option);
+            }
+            if (Collection.class.isAssignableFrom(fieldClass)) {
+                return decodeCollection(template, fieldClass, option);
+            }
 
-        return new ObjectDecoder(byteBuf).decode(fieldClass.newInstance());
+            return new ObjectDecoder(byteBuf).decode(fieldClass.newInstance());
+        }catch (Exception e){
+            if(option!=null && !option.required()){
+                return null;
+            }
+            throw e;
+        }
 
     }
 
