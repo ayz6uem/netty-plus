@@ -74,18 +74,16 @@ public class TaskContext {
      * @param task
      */
     private void await(Object resultId, Task task) {
-        if (taskPool.containsKey(resultId)) {
-            Task oldTask = taskPool.get(resultId);
-            if (oldTask.end.isBefore(LocalDateTime.now())) {
+        Task old = taskPool.putIfAbsent(resultId, task);
+        if(old!=null){
+            if(old.isWaiting()){
+                throw new TaskExecutingException("task exist, please wait it");
+            }else{
                 cancel(resultId);
+                await(resultId, task);
             }
         }
-        if (!taskPool.containsKey(resultId)) {
-            task.timeout = wheelTimer.newTimeout(task, timeout, TimeUnit.SECONDS);
-            taskPool.put(resultId, task);
-            return;
-        }
-        throw new TaskExecutingException("task exist, please wait it");
+        task.timeout = wheelTimer.newTimeout(task, timeout, TimeUnit.SECONDS);
     }
 
     /**
@@ -237,6 +235,11 @@ public class TaskContext {
             if (!timeout.isCancelled()) {
                 sink.error(new TimeoutException("task timeout"));
             }
+        }
+
+        public boolean isWaiting(){
+            LocalDateTime now = LocalDateTime.now();
+            return now.isAfter(start) && now.isBefore(end);
         }
 
 

@@ -65,18 +65,16 @@ public class ChannelContext {
 
     public Channel online(Object id,Channel channel){
         Assert.notNull(id,"id can not be null");
-        if(channelMap.containsKey(id)){
-            Channel old = channelMap.get(id);
-            if(!Objects.equals(old.id(),channel.id())){
-                invalid(old);
-                old.close();
-            }
+        Channel old = channelMap.putIfAbsent(id,channel);
+        if(old != null && !Objects.equals(old.id(),channel.id())){
+            invalid(old);
+            old.close();
         }
         channel.attr(BIZ_ID_KEY).set(id);
         if(Objects.nonNull(onlineConsumer)){
             onlineConsumer.accept(id,channel);
         }
-        return channelMap.put(id,channel);
+        return channel;
     }
 
     public void offline(Channel channel){

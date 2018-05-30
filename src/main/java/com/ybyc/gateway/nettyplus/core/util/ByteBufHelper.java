@@ -10,7 +10,7 @@ import java.nio.ByteOrder;
  */
 public class ByteBufHelper {
 
-    public static void set(ByteBuf buf, int offset, int length, ByteOrder byteOrder, int value) {
+    public static void set(ByteBuf buf, int offset, int length, ByteOrder byteOrder, long value) {
         if(ByteOrder.BIG_ENDIAN.equals(byteOrder)){
             set(buf,offset,length,value);
         }else{
@@ -18,19 +18,19 @@ public class ByteBufHelper {
         }
     }
 
-    public static void set(ByteBuf buf,int offset, int length,int value) {
+    public static void set(ByteBuf buf,int offset, int length,long value) {
         switch (length) {
             case 1:
-                buf.setByte(offset,value);
+                buf.setByte(offset,(int)value);
                 break;
             case 2:
-                buf.setShort(offset,value);
+                buf.setShort(offset,(int)value);
                 break;
             case 3:
-                buf.setMedium(offset,value);
+                buf.setMedium(offset,(int)value);
                 break;
             case 4:
-                buf.setInt(offset,value);
+                buf.setInt(offset,(int)value);
                 break;
             case 8:
                 buf.setLong(offset,value);
@@ -40,19 +40,19 @@ public class ByteBufHelper {
         }
     }
 
-    public static void setLE(ByteBuf buf,int offset, int length,int value) {
+    public static void setLE(ByteBuf buf,int offset, int length,long value) {
         switch (length) {
             case 1:
-                buf.setByte(offset,value);
+                buf.setByte(offset,(int)value);
                 break;
             case 2:
-                buf.setShortLE(offset,value);
+                buf.setShortLE(offset,(int)value);
                 break;
             case 3:
-                buf.setMediumLE(offset,value);
+                buf.setMediumLE(offset,(int)value);
                 break;
             case 4:
-                buf.setIntLE(offset,value);
+                buf.setIntLE(offset,(int)value);
                 break;
             case 8:
                 buf.setLongLE(offset,value);
