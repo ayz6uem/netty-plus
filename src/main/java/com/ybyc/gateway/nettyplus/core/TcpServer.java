@@ -7,10 +7,12 @@ import com.ybyc.gateway.nettyplus.core.context.ChannelContext;
 import com.ybyc.gateway.nettyplus.core.context.TaskContext;
 import com.ybyc.gateway.nettyplus.core.handler.*;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.MessageToMessageCodec;
 import io.netty.handler.timeout.IdleStateEvent;
@@ -19,12 +21,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteOrder;
+import java.rmi.NoSuchObjectException;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Server 构建启动类
@@ -74,6 +78,7 @@ public class TcpServer {
     }
 
     public void start() throws Exception {
+
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -84,23 +89,22 @@ public class TcpServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            //异常统一处理
-                            ch.pipeline().addLast(ExceptionHandler.class.getSimpleName(), new ExceptionHandler(exceptionConsumer));
                             //读写超时处理，用户判断心跳超时
                             ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(), new IdleStateHandler(options.readIdle, options.writeIdle, options.allIdle, TimeUnit.SECONDS));
-                            //链接处理，链接断开，读写超时事件捕获
-                            ch.pipeline().addLast(ConnectionChannelHandler.class.getSimpleName(), new ConnectionChannelHandler(eventBiConsumer));
-                            //基于帧长度的解析器
-                            ch.pipeline().addLast(LengthFieldBasedFrameDecoder.class.getSimpleName(), new LengthFieldBasedFrameDecoder(Options.DEFAULT_BYTEORDER,options.frameMaxLength, options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment, options.lengthInitialBytes,true));
-                            if(options.printBytes || logger.isDebugEnabled()){
-                                ch.pipeline().addLast(BytesHandler.class.getSimpleName(), new BytesHandler());
+                            //异常统一处理 链接处理，链接断开，读写超时事件捕获
+                            ch.pipeline().addLast(ConnectionChannelHandler.class.getSimpleName(), new ConnectionChannelHandler(eventBiConsumer, exceptionConsumer));
+
+                            if(Objects.nonNull(options.sliceFrameDecoderConsumer)){
+                                options.sliceFrameDecoderConsumer.accept(ch.pipeline());
                             }
+
                             //校验处理器
                             if (Objects.nonNull(options.frameChecker)) {
-                                ch.pipeline().addLast("FrameChecker", options.frameChecker);
+                                ch.pipeline().addAfter(Options.SLICE_FRAME_DECODER_NAME,"FrameChecker", options.frameChecker);
                             }
-                            //基于帧长度的编码器
-                            ch.pipeline().addLast(LengthFieldBasedFrameEncoder.class.getSimpleName(), new LengthFieldBasedFrameEncoder(options.lengthFieldOffset, options.lengthFieldLength, options.lengthAdjustment));
+                            if(options.printBytes || logger.isDebugEnabled()){
+                                ch.pipeline().addAfter(Options.SLICE_FRAME_DECODER_NAME, BytesHandler.class.getSimpleName(), new BytesHandler());
+                            }
 
                             //指令解析器
                             ch.pipeline().addLast(DirectiveCodec.class.getSimpleName(), new DirectiveCodec(options.directiveOffset, options.directiveLength, options.directiveFunction));
@@ -117,7 +121,7 @@ public class TcpServer {
                                 options.frameInboundHandler.forEach(inboundHandler -> ch.pipeline().addLast(inboundHandler));
                             }
                             //其他管道处理
-                            if (pipelineConsumer != null) {
+                            if (Objects.nonNull(pipelineConsumer)) {
                                 pipelineConsumer.accept(ch.pipeline());
                             }
                         }
@@ -190,6 +194,11 @@ public class TcpServer {
     }
 
     public static class Options {
+
+        public static final String SLICE_FRAME_DECODER_NAME = "SliceFrameDecoderName";
+
+        public Consumer<ChannelPipeline> sliceFrameDecoderConsumer;
+
         public int port = 80;
         public int backlog = 128;
         public boolean keepalive = true;
@@ -198,10 +207,9 @@ public class TcpServer {
         public int allIdle = 120;
 
         public int frameMaxLength = 1024 * 1024;
-        public int lengthFieldOffset = 0;
-        public int lengthFieldLength = 1;
         public int lengthAdjustment = 0;
         public int lengthInitialBytes = 0;
+
 
         public MessageToMessageCodec frameChecker;
         public MessageToMessageCodec frameLogRecord;
@@ -253,11 +261,36 @@ public class TcpServer {
             return this;
         }
 
+        /**
+         * 基于帧长度的编码器
+         * @param lengthFieldOffset
+         * @param lengthFieldLength
+         * @param lengthAdjustment
+         * @param lengthInitialBytes
+         * @return
+         */
         public Options lengthField(int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int lengthInitialBytes) {
-            this.lengthFieldOffset = lengthFieldOffset;
-            this.lengthFieldLength = lengthFieldLength;
-            this.lengthAdjustment = lengthAdjustment;
-            this.lengthInitialBytes = lengthInitialBytes;
+            sliceFrameDecoderConsumer = pipeline -> {
+                pipeline.addLast(SLICE_FRAME_DECODER_NAME,
+                        new LengthFieldBasedFrameDecoder(Options.DEFAULT_BYTEORDER,
+                                frameMaxLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, lengthInitialBytes,true));
+                pipeline.addLast(LengthFieldBasedFrameEncoder.class.getSimpleName(),
+                        new LengthFieldBasedFrameEncoder(lengthFieldOffset, lengthFieldLength, lengthAdjustment));
+
+            };
+            return this;
+        }
+
+        /**
+         * 基于分隔符的编码器
+         * @param delimiter
+         * @return
+         */
+        public Options delimiter(ByteBuf delimiter) {
+            return delimiter(delimiter, true);
+        }
+        public Options delimiter(ByteBuf delimiter, boolean stripDelimiter) {
+            sliceFrameDecoderConsumer = pipeline -> pipeline.addLast(SLICE_FRAME_DECODER_NAME, new DelimiterBasedFrameDecoder(frameMaxLength, stripDelimiter, delimiter));
             return this;
         }
 

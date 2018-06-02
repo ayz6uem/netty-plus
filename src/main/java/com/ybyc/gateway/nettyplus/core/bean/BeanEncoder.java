@@ -1,8 +1,10 @@
-package com.ybyc.gateway.nettyplus.core.util;
+package com.ybyc.gateway.nettyplus.core.bean;
 
 import com.ybyc.gateway.nettyplus.core.TcpServer;
-import com.ybyc.gateway.nettyplus.core.option.Option;
-import com.ybyc.gateway.nettyplus.core.option.StringOption;
+import com.ybyc.gateway.nettyplus.core.util.Assert;
+import com.ybyc.gateway.nettyplus.core.util.ByteBufHelper;
+import com.ybyc.gateway.nettyplus.core.util.OptionHelper;
+import com.ybyc.gateway.nettyplus.core.util.ReflectHelper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.EncoderException;
@@ -14,13 +16,14 @@ import java.lang.reflect.Field;
 import java.nio.ByteOrder;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  * 类编码器，将类对象编码为ByteBuf，支持基本类型和String
  * @author wangzhe
  */
-public class ObjectEncoder {
+public class BeanEncoder {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -29,17 +32,17 @@ public class ObjectEncoder {
 
     private ByteOrder byteOrder = TcpServer.Options.DEFAULT_BYTEORDER;
 
-    public ObjectEncoder byteOrder(ByteOrder byteOrder){
+    public BeanEncoder byteOrder(ByteOrder byteOrder){
         this.byteOrder = byteOrder;
         return this;
     }
 
-    public ObjectEncoder(Object data) {
+    public BeanEncoder(Object data) {
         this.data = data;
         byteBuf = Unpooled.buffer();
     }
 
-    public ObjectEncoder(Object data, ByteBuf byteBuf) {
+    public BeanEncoder(Object data, ByteBuf byteBuf) {
         this.data = data;
         this.byteBuf = byteBuf;
     }
@@ -52,7 +55,13 @@ public class ObjectEncoder {
                 Field field = fields.next();
                 Object value = field.get(data);
                 if (value != null) {
-                    encode(field,value);
+                    if(OptionHelper.idGroups(field)){
+                        int startBytes = byteBuf.readableBytes();
+                        encode(field,value);
+                        encodeGroups(data,field,startBytes);
+                    }else{
+                        encode(field,value);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -79,11 +88,61 @@ public class ObjectEncoder {
             if (value.getClass().isArray()) {
                 return encodeArray(value);
             }
-            new ObjectEncoder(value, byteBuf).encode();
+            new BeanEncoder(value, byteBuf).encode();
             return true;
         } catch (Exception e) {
             throw new EncoderException(e);
         }
+    }
+
+    /**
+     * 编码klv
+     * @param data
+     * @param field
+     * @param groupsStartBytes
+     * @throws IllegalAccessException
+     */
+    private void encodeGroups(Object data, Field field, int groupsStartBytes) throws IllegalAccessException {
+        Groups groupsAnno = field.getAnnotation(Groups.class);
+        Map<Object,Field> keyFieldMap = ReflectHelper.getKeyField(data.getClass());
+        int groupsLength = byteBuf.readableBytes() - groupsStartBytes;
+        int groups = 0;
+        int keyBytes = groupsAnno.keyBytes();
+        int lengthBytes = groupsAnno.lengthBytes();
+
+        /**
+         * 遍历所有@Key的字段
+         */
+        Iterator<Field> iterator = keyFieldMap.values().iterator();
+        while (iterator.hasNext()){
+            groups++;
+            Field keyField = iterator.next();
+            keyField.setAccessible(true);
+            Object value = keyField.get(data);
+            if(value==null){
+                //忽略null值
+                continue;
+            }
+
+            Key key = keyField.getAnnotation(Key.class);
+
+            //写 key
+            ByteBufHelper.write(byteBuf, keyBytes, key.value(), byteOrder);
+            //写 length 用 0填充
+            ByteBufHelper.write(byteBuf, lengthBytes, 0, byteOrder);
+
+            int valueStartBytes = byteBuf.readableBytes();
+            encode(keyField,value);
+            int length = byteBuf.readableBytes() - valueStartBytes;
+
+            //回填length的值
+            ByteBufHelper.set(byteBuf, valueStartBytes-lengthBytes,lengthBytes, byteOrder, length);
+
+        }
+
+        //自动填入groups的值
+        ByteBufHelper.set(byteBuf,groupsStartBytes,groupsLength,byteOrder,groups);
+
     }
 
     private boolean encodePrimitive(Number value,Option option) throws Exception {
@@ -97,9 +156,7 @@ public class ObjectEncoder {
         StringOption stringOption = StringOption.NATURAL;
         if(Objects.nonNull(option)){
             length = option.value();
-            if(Objects.nonNull(option.string())){
-                stringOption = option.string();
-            }
+            stringOption = option.string();
         }
         byte[] bytes = OptionHelper.convertToBytes(value, length, stringOption);
         byteBuf.writeBytes(bytes);
@@ -113,7 +170,7 @@ public class ObjectEncoder {
                     int bytes = ReflectHelper.primitiveBytes(coll.getClass());
                     ByteBufHelper.write(byteBuf, bytes, (Number) coll, byteOrder);
                 } else {
-                    new ObjectEncoder(coll, byteBuf).encode();
+                    new BeanEncoder(coll, byteBuf).encode();
                 }
             } catch (Exception e) {
                 throw new EncoderException("can not encoder collection");
@@ -131,7 +188,7 @@ public class ObjectEncoder {
                 int bytes = ReflectHelper.primitiveBytes(object.getClass());
                 ByteBufHelper.write(byteBuf, bytes, (Number) object, byteOrder);
             } else {
-                new ObjectEncoder(object, byteBuf).encode();
+                new BeanEncoder(object, byteBuf).encode();
             }
         }
         return true;

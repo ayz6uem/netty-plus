@@ -2,7 +2,7 @@ package com.ybyc.gateway.nettyplus.core.codec;
 
 import com.ybyc.gateway.nettyplus.core.TcpServer;
 import com.ybyc.gateway.nettyplus.core.util.ByteBufHelper;
-import com.ybyc.gateway.nettyplus.core.util.ObjectCodec;
+import com.ybyc.gateway.nettyplus.core.bean.BeanCodec;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
@@ -54,7 +54,7 @@ public class DirectiveCodec extends MessageToMessageCodec<ByteBuf,Object> {
             buf.retain();
             out.add(buf);
         }else{
-            ByteBuf byteBuf = ObjectCodec.just(msg).byteOrder(byteOrder).encode();
+            ByteBuf byteBuf = BeanCodec.just(msg).byteOrder(byteOrder).encode();
             out.add(byteBuf);
         }
     }
@@ -63,7 +63,7 @@ public class DirectiveCodec extends MessageToMessageCodec<ByteBuf,Object> {
     protected void decode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         int directive = ByteBufHelper.get(msg, directiveOffset, directiveLength, TcpServer.Options.DEFAULT_BYTEORDER).intValue();
         Object message = directiveFunction.apply(directive);
-        message = ObjectCodec.just(msg).byteOrder(byteOrder).decode(message);
+        message = BeanCodec.just(msg).byteOrder(byteOrder).decode(message);
         out.add(message);
     }
 }

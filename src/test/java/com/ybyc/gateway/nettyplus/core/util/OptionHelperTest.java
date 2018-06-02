@@ -2,7 +2,8 @@ package com.ybyc.gateway.nettyplus.core.util;
 
 import com.ybyc.gateway.nettyplus.core.Heart;
 import com.ybyc.gateway.nettyplus.core.Message;
-import com.ybyc.gateway.nettyplus.core.option.Option;
+import com.ybyc.gateway.nettyplus.core.bean.BeanCodec;
+import com.ybyc.gateway.nettyplus.core.bean.Option;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -36,7 +37,7 @@ public class OptionHelperTest {
         byteBuf.writeByte(1);
         byteBuf.writeByte(2);
 
-        Data data = ObjectCodec.just(byteBuf).decode(new Data());
+        Data data = BeanCodec.just(byteBuf).decode(new Data());
         System.out.println(data);
     }
 

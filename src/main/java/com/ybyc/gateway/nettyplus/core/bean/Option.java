@@ -1,4 +1,4 @@
-package com.ybyc.gateway.nettyplus.core.option;
+package com.ybyc.gateway.nettyplus.core.bean;
 
 import java.lang.annotation.*;
 

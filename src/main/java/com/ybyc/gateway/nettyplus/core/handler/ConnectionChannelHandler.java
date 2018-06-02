@@ -18,11 +18,16 @@ import java.util.function.Consumer;
  */
 public class ConnectionChannelHandler extends ChannelInboundHandlerAdapter {
 
+    Logger logger = LoggerFactory.getLogger(this.getClass());
+
     ChannelContext channelContext = ChannelContext.getInstance();
     BiConsumer<ChannelHandlerContext,IdleStateEvent> eventBiConsumer;
 
-    public ConnectionChannelHandler(BiConsumer<ChannelHandlerContext, IdleStateEvent> eventBiConsumer) {
+    Consumer<Throwable> exceptionConsumer;
+
+    public ConnectionChannelHandler(BiConsumer<ChannelHandlerContext, IdleStateEvent> eventBiConsumer, Consumer<Throwable> exceptionConsumer) {
         this.eventBiConsumer = eventBiConsumer;
+        this.exceptionConsumer = exceptionConsumer;
     }
 
     @Override
@@ -43,5 +48,13 @@ public class ConnectionChannelHandler extends ChannelInboundHandlerAdapter {
             }
         }
         super.userEventTriggered(ctx, evt);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        logger.error(cause.getMessage(),cause);
+        if(Objects.nonNull(exceptionConsumer)){
+            exceptionConsumer.accept(cause);
+        }
     }
 }

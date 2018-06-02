@@ -8,6 +8,12 @@ import java.util.Objects;
  */
 public class Assert {
 
+    public static void notEquals(Object object,Object target, String msg){
+        if(Objects.equals(object,target)){
+            throw new IllegalArgumentException(msg);
+        }
+    }
+
     public static void notNull(Object object, String msg){
         if(Objects.isNull(object)){
             throw new IllegalArgumentException(msg);

@@ -1,4 +1,4 @@
-package com.ybyc.gateway.nettyplus.core.util;
+package com.ybyc.gateway.nettyplus.core.bean;
 
 import io.netty.buffer.ByteBuf;
 
@@ -12,14 +12,14 @@ import io.netty.buffer.ByteBuf;
  * attention "{}"，or i will not get Content.class
  * @author wangzhe
  */
-public class ObjectCodec {
+public class BeanCodec {
 
-    public static ObjectDecoder just(ByteBuf byteBuf){
-        return new ObjectDecoder(byteBuf);
+    public static BeanDecoder just(ByteBuf byteBuf){
+        return new BeanDecoder(byteBuf);
     }
 
-    public static ObjectEncoder just(Object object){
-        return new ObjectEncoder(object);
+    public static BeanEncoder just(Object object){
+        return new BeanEncoder(object);
     }
 
 }

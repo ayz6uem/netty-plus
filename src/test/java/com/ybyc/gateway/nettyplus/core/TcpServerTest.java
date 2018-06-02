@@ -6,6 +6,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.function.Function;
@@ -63,6 +64,7 @@ public class TcpServerTest {
 
     }
 
+    @Test
     public void test1() throws InterruptedException {
         String host = "127.0.0.1";
 

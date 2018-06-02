@@ -1,4 +1,4 @@
-package com.ybyc.gateway.nettyplus.core.option;
+package com.ybyc.gateway.nettyplus.core.bean;
 
 /**
  * 支持的字符串转换操作

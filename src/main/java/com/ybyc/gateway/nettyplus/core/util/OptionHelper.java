@@ -1,8 +1,9 @@
 package com.ybyc.gateway.nettyplus.core.util;
 
 
-import com.ybyc.gateway.nettyplus.core.option.Option;
-import com.ybyc.gateway.nettyplus.core.option.StringOption;
+import com.ybyc.gateway.nettyplus.core.bean.Groups;
+import com.ybyc.gateway.nettyplus.core.bean.Option;
+import com.ybyc.gateway.nettyplus.core.bean.StringOption;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.util.ReferenceCountUtil;
@@ -11,7 +12,6 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.function.BiFunction;
 
 /**
  * Option处理工具
@@ -19,7 +19,10 @@ import java.util.function.BiFunction;
  */
 public class OptionHelper {
 
-    public static int getLength(Object data, Option option){
+    public static int getLength(Option option, Object data){
+        if(option == null){
+            return -1;
+        }
         int length = option.value();
         if (!"".equals(option.lengthField())) {
             length = ReflectHelper.getIntValue(data, option.lengthField());
@@ -27,7 +30,9 @@ public class OptionHelper {
         return length;
     }
 
-
+    public static boolean idGroups(Field field){
+        return field.getAnnotation(Groups.class) != null;
+    }
 
     public static String convertToString(ByteBuf byteBuf, StringOption option, int length) {
         String result;
@@ -118,4 +123,15 @@ public class OptionHelper {
         return false;
     }
 
+    public static <T> int getGroupSize(Groups groups, T template, Field field) {
+        if(groups.value()!=-1){
+            return groups.value();
+        }
+        try {
+            field.setAccessible(true);
+            return ((Number) field.get(template)).intValue();
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
 }

@@ -1,6 +1,8 @@
 package com.ybyc.gateway.nettyplus.core.util;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
 
 import java.nio.ByteOrder;
 
@@ -388,6 +390,19 @@ public class ByteBufHelper {
         byte[] result = new byte[length];
         for(int i=0;i<bytes.length&&i<length;i++){
             result[i] = bytes[i];
+        }
+        return result;
+    }
+
+    public static ByteBuf insert(ByteBuf buf, int offset, byte b){
+        int length = buf.readableBytes();
+        ByteBuf result = Unpooled.buffer(length+1);
+        if(offset>0){
+            result.writeBytes(buf.slice(0,offset));
+        }
+        result.writeByte(b);
+        if(offset<length){
+            result.writeBytes(buf.slice(offset,length-offset));
         }
         return result;
     }

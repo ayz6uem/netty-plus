@@ -2,7 +2,7 @@ package com.ybyc.gateway.nettyplus.core.codec;
 
 import com.ybyc.gateway.nettyplus.core.TcpServer;
 import com.ybyc.gateway.nettyplus.core.util.ByteBufHelper;
-import com.ybyc.gateway.nettyplus.core.util.ObjectCodec;
+import com.ybyc.gateway.nettyplus.core.bean.BeanCodec;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageCodec;
@@ -45,7 +45,7 @@ public class CoupleDirectiveCodec extends MessageToMessageCodec<ByteBuf,Object> 
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
-        ByteBuf byteBuf = ObjectCodec.just(msg).encode();
+        ByteBuf byteBuf = BeanCodec.just(msg).encode();
         out.add(byteBuf);
     }
 
@@ -54,7 +54,7 @@ public class CoupleDirectiveCodec extends MessageToMessageCodec<ByteBuf,Object> 
         int firstDirective = ByteBufHelper.get(msg, firstDirectiveOffset, firstDirectiveLength, TcpServer.Options.DEFAULT_BYTEORDER).intValue();
         int secondDirective = ByteBufHelper.get(msg, secondDirectiveOffset, secondDirectiveLength, TcpServer.Options.DEFAULT_BYTEORDER).intValue();
         Object message = messageCreator.apply(firstDirective,secondDirective);
-        message = ObjectCodec.just(msg).decode(message);
+        message = BeanCodec.just(msg).decode(message);
         out.add(message);
     }
 }
