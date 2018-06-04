@@ -64,7 +64,6 @@ public class TcpServerTest {
 
     }
 
-    @Test
     public void test1() throws InterruptedException {
         String host = "127.0.0.1";
 

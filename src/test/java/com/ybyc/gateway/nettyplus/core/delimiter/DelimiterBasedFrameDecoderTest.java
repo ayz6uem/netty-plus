@@ -46,8 +46,7 @@ public class DelimiterBasedFrameDecoderTest {
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) throws Exception {
-            System.out.println("readableBytes:"+msg.readableBytes());
-            System.out.println(":"+ByteBufUtil.hexDump(msg));
+            System.out.println(msg.readableBytes()+"-"+msg.isReadable()+" :"+ByteBufUtil.hexDump(msg));
         }
     }
 
