@@ -89,8 +89,10 @@ public class TcpServer {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         public void initChannel(SocketChannel ch) throws Exception {
-                            //读写超时处理，用户判断心跳超时
-                            ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(), new IdleStateHandler(options.readIdle, options.writeIdle, options.allIdle, TimeUnit.SECONDS));
+                            if(options.triggerIdle){
+                                //读写超时处理，用户判断心跳超时
+                                ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(), new IdleStateHandler(options.readIdle, options.writeIdle, options.allIdle, TimeUnit.SECONDS));
+                            }
                             //异常统一处理 链接处理，链接断开，读写超时事件捕获
                             ch.pipeline().addLast(ConnectionChannelHandler.class.getSimpleName(), new ConnectionChannelHandler(eventBiConsumer, exceptionConsumer));
 
@@ -202,6 +204,7 @@ public class TcpServer {
         public int port = 80;
         public int backlog = 128;
         public boolean keepalive = true;
+        public boolean triggerIdle = true;
         public int writeIdle = 60;
         public int readIdle = 60;
         public int allIdle = 120;
@@ -245,9 +248,15 @@ public class TcpServer {
         }
 
         public Options idle(int writeIdle, int readIdle, int allIdle) {
+            this.triggerIdle = true;
             this.writeIdle = writeIdle;
             this.readIdle = readIdle;
             this.allIdle = allIdle;
+            return this;
+        }
+
+        public Options idle(boolean triggerIdle) {
+            this.triggerIdle = triggerIdle;
             return this;
         }
 
