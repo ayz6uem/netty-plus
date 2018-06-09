@@ -115,7 +115,6 @@ public class BeanEncoder {
          */
         Iterator<Field> iterator = keyFieldMap.values().iterator();
         while (iterator.hasNext()){
-            groups++;
             Field keyField = iterator.next();
             keyField.setAccessible(true);
             Object value = keyField.get(data);
@@ -123,6 +122,7 @@ public class BeanEncoder {
                 //忽略null值
                 continue;
             }
+            groups++;
 
             Key key = keyField.getAnnotation(Key.class);
 

@@ -48,7 +48,7 @@ public class XorChecker extends MessageToMessageCodec<ByteBuf, ByteBuf> {
         byte loopxor = XorHelper.loop(msg, bytesOffset, msg.readableBytes() + checkByteIndex);
         byte xor = msg.getByte(msg.readableBytes() + checkByteIndex);
         if (loopxor != xor) {
-            throw new BytesCheckException("loop:" + loopxor + " sum:" + xor + " bytes:" + ByteBufUtil.hexDump(msg).toUpperCase());
+            throw new BytesCheckException("loop:" + loopxor + " xor:" + xor + " bytes:" + ByteBufUtil.hexDump(msg).toUpperCase());
         }
         out.add(msg);
     }

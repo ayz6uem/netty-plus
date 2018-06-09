@@ -31,8 +31,19 @@ public class ConnectionChannelHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
+    public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
+        super.channelRegistered(ctx);
+        if(logger.isDebugEnabled()){
+            logger.info("channelRegistered:{}",ctx.channel().remoteAddress());
+        }
+    }
+
+    @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
+        if(logger.isDebugEnabled()){
+            logger.info("channelUnregistered:{}",ctx.channel().remoteAddress());
+        }
         ctx.channel().close();
         channelContext.offline(ctx.channel());
     }

@@ -8,7 +8,7 @@ import io.netty.buffer.ByteBuf;
  *     Header header;
  *     T body;
  * }
- * Foo<Content> foo = ObjectCodec.just(byteBuf).decode(new Foo<Content>(){});
+ * Foo<Content> foo = BeanCodec.just(byteBuf).decode(new Foo<Content>(){});
  * attention "{}"，or i will not get Content.class
  * @author wangzhe
  */

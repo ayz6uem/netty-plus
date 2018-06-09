@@ -204,7 +204,7 @@ public class TcpServer {
         public int port = 80;
         public int backlog = 128;
         public boolean keepalive = true;
-        public boolean triggerIdle = true;
+        public boolean triggerIdle = false;
         public int writeIdle = 60;
         public int readIdle = 60;
         public int allIdle = 120;
