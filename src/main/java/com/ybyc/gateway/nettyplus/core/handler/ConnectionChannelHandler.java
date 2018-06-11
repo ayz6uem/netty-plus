@@ -25,6 +25,13 @@ public class ConnectionChannelHandler extends ChannelInboundHandlerAdapter {
 
     Consumer<Throwable> exceptionConsumer;
 
+    public ConnectionChannelHandler() {
+    }
+
+    public ConnectionChannelHandler(BiConsumer<ChannelHandlerContext, IdleStateEvent> eventBiConsumer) {
+        this.eventBiConsumer = eventBiConsumer;
+    }
+
     public ConnectionChannelHandler(BiConsumer<ChannelHandlerContext, IdleStateEvent> eventBiConsumer, Consumer<Throwable> exceptionConsumer) {
         this.eventBiConsumer = eventBiConsumer;
         this.exceptionConsumer = exceptionConsumer;

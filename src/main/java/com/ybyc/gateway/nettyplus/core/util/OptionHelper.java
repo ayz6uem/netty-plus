@@ -108,13 +108,6 @@ public class OptionHelper {
                 if(Objects.nonNull(value) && Objects.equals(value.getClass(),targetClass)){
                     return true;
                 }
-                if(Object.class.equals(field.getType())){
-                    Option option = field.getAnnotation(Option.class);
-                    Class<?> componentClass = getFieldActualClass(target,field,option);
-                    if(Objects.equals(componentClass,targetClass)){
-                        return true;
-                    }
-                }
             }
         }catch (Exception e){
             e.printStackTrace();
