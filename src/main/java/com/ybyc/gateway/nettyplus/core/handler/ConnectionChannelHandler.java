@@ -47,18 +47,14 @@ public class ConnectionChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        if(logger.isDebugEnabled()){
-            logger.info("channel {} in",ctx.channel().remoteAddress());
-        }
+        logger.info("channel {} in",ctx.channel().remoteAddress());
         ctx.channel().attr(inTime).set(LocalDateTime.now());
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
-        if(logger.isDebugEnabled()){
-            logger.info("channel {} out . in at {}",ctx.channel().remoteAddress(),ctx.channel().attr(inTime).get().format(dateTimeFormatter));
-        }
+        logger.info("channel {} out - in at {}",ctx.channel().remoteAddress(),ctx.channel().attr(inTime).get().format(dateTimeFormatter));
         ctx.channel().close();
         channelContext.offline(ctx.channel());
     }

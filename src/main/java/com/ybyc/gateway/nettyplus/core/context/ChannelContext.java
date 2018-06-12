@@ -69,6 +69,8 @@ public class ChannelContext {
         if(old != null && !Objects.equals(old.id(),channel.id())){
             invalid(old);
             old.close();
+            channelMap.remove(id);
+            return online(id,channel);
         }
         channel.attr(BIZ_ID_KEY).set(id);
         if(Objects.nonNull(onlineConsumer)){
