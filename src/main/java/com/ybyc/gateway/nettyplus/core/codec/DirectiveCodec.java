@@ -54,7 +54,7 @@ public class DirectiveCodec extends MessageToMessageCodec<ByteBuf,Object> {
             buf.retain();
             out.add(buf);
         }else{
-            ByteBuf byteBuf = BeanCodec.just(msg).byteOrder(byteOrder).encode();
+            ByteBuf byteBuf = BeanCodec.just(msg,ctx.alloc().buffer()).byteOrder(byteOrder).encode();
             out.add(byteBuf);
         }
     }

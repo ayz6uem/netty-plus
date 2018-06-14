@@ -22,4 +22,8 @@ public class BeanCodec {
         return new BeanEncoder(object);
     }
 
+    public static BeanEncoder just(Object object, ByteBuf buf){
+        return new BeanEncoder(object,buf);
+    }
+
 }
