@@ -24,9 +24,10 @@ public class ExceptionHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error(cause.getMessage(),cause);
         if(Objects.nonNull(exceptionConsumer)){
             exceptionConsumer.accept(cause);
+        }else{
+            logger.error(cause.getMessage(),cause);
         }
     }
 }
