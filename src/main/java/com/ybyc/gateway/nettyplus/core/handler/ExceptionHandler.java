@@ -18,6 +18,9 @@ public class ExceptionHandler extends ChannelInboundHandlerAdapter {
 
     Consumer<Throwable> exceptionConsumer;
 
+    public ExceptionHandler() {
+    }
+
     public ExceptionHandler(Consumer<Throwable> exceptionConsumer) {
         this.exceptionConsumer = exceptionConsumer;
     }
