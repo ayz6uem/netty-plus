@@ -45,7 +45,7 @@ public class CoupleDirectiveCodec extends MessageToMessageCodec<ByteBuf,Object> 
 
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, List<Object> out) throws Exception {
-        ByteBuf byteBuf = BeanCodec.just(msg).encode();
+        ByteBuf byteBuf = BeanCodec.just(msg, ctx.alloc().buffer()).encode();
         out.add(byteBuf);
     }
 

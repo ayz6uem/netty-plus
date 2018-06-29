@@ -94,7 +94,7 @@ public class TcpServer {
                                 ch.pipeline().addLast(IdleStateHandler.class.getSimpleName(), new IdleStateHandler(options.readIdle, options.writeIdle, options.allIdle, TimeUnit.SECONDS));
                             }
                             //异常统一处理 链接处理，链接断开，读写超时事件捕获
-                            ch.pipeline().addLast(ConnectionChannelHandler.class.getSimpleName(), new ConnectionChannelHandler(eventBiConsumer, exceptionConsumer));
+                            ch.pipeline().addLast(ConnectionChannelHandler.class.getSimpleName(), new ConnectionChannelHandler(eventBiConsumer));
 
                             if(Objects.nonNull(options.sliceFrameDecoderConsumer)){
                                 options.sliceFrameDecoderConsumer.accept(ch.pipeline());
@@ -126,6 +126,7 @@ public class TcpServer {
                             if (Objects.nonNull(pipelineConsumer)) {
                                 pipelineConsumer.accept(ch.pipeline());
                             }
+                            ch.pipeline().addLast(new ExceptionHandler(exceptionConsumer));
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, options.backlog)

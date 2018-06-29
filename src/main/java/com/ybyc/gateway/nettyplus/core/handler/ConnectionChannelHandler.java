@@ -30,18 +30,11 @@ public class ConnectionChannelHandler extends ChannelInboundHandlerAdapter {
     AttributeKey<LocalDateTime> inTime = AttributeKey.valueOf("inTime");
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
-    Consumer<Throwable> exceptionConsumer;
-
     public ConnectionChannelHandler() {
     }
 
     public ConnectionChannelHandler(BiConsumer<ChannelHandlerContext, IdleStateEvent> eventBiConsumer) {
         this.eventBiConsumer = eventBiConsumer;
-    }
-
-    public ConnectionChannelHandler(BiConsumer<ChannelHandlerContext, IdleStateEvent> eventBiConsumer, Consumer<Throwable> exceptionConsumer) {
-        this.eventBiConsumer = eventBiConsumer;
-        this.exceptionConsumer = exceptionConsumer;
     }
 
     @Override
@@ -72,11 +65,4 @@ public class ConnectionChannelHandler extends ChannelInboundHandlerAdapter {
         super.userEventTriggered(ctx, evt);
     }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error(cause.getMessage(),cause);
-        if(Objects.nonNull(exceptionConsumer)){
-            exceptionConsumer.accept(cause);
-        }
-    }
 }
