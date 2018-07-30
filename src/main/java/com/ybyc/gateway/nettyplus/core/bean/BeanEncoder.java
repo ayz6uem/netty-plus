@@ -49,7 +49,7 @@ public class BeanEncoder {
 
     public ByteBuf encode() {
         Assert.notNull(data, "can not encode null");
-        Iterator<Field> fields = ReflectHelper.getDataField(data.getClass()).iterator();
+        Iterator<Field> fields = ClassFieldContext.getDataField(data.getClass()).iterator();
         try {
             while (fields.hasNext()){
                 Field field = fields.next();
@@ -104,7 +104,7 @@ public class BeanEncoder {
      */
     private void encodeGroups(Object data, Field field, int groupsStartBytes) throws IllegalAccessException {
         Groups groupsAnno = field.getAnnotation(Groups.class);
-        Map<Object,Field> keyFieldMap = ReflectHelper.getKeyField(data.getClass());
+        Map<Object,Field> keyFieldMap = ClassFieldContext.getKeyField(data.getClass());
         int groupsLength = byteBuf.readableBytes() - groupsStartBytes;
         int groups = 0;
         int keyBytes = groupsAnno.keyBytes();

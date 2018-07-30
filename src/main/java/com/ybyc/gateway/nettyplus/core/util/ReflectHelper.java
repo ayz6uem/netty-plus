@@ -18,60 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ReflectHelper {
 
-    private static Map<Class<?>,List<Field>> fieldPool = new HashMap<>();
-
-    public static Collection<Field> getDataField(Class<?> clzz){
-        Collection<Field> fields = fieldPool.get(clzz);
-        if(fields==null){
-            fields = findDataField(clzz);
-        }
-        return fields;
-    }
-
-    private static Collection<Field> findDataField(Class<?> clzz){
-        if(Object.class.equals(clzz)){
-            return new ArrayList<>();
-        }
-        Collection<Field> fields = findDataField(clzz.getSuperclass());
-        Field[] array = clzz.getDeclaredFields();
-        for(Field field : array){
-            if(!ReflectHelper.isDataField(field,clzz)){
-                continue;
-            }
-            field.setAccessible(true);
-            fields.add(field);
-        }
-        return fields;
-    }
-
-    private static Map<Class<?>,Map<Object,Field>> keyFieldPool = new HashMap<>();
-
-    public static Map<Object, Field> getKeyField(Class<?> clzz) {
-        Map<Object,Field> keyFields = keyFieldPool.get(clzz);
-        if(keyFields==null){
-            keyFields = findKeyField(clzz);
-        }
-        return keyFields;
-    }
-    private static Map<Object, Field> findKeyField(Class<?> clzz) {
-        if(Object.class.equals(clzz)){
-            return new HashMap<>();
-        }
-        Map<Object,Field> fields = findKeyField(clzz.getSuperclass());
-        Field[] array = clzz.getDeclaredFields();
-        for(Field field : array){
-            if(!ReflectHelper.isKeyField(field,clzz)){
-                continue;
-            }
-            field.setAccessible(true);
-            Key key = field.getAnnotation(Key.class);
-            fields.put(key.value(),field);
-        }
-        return fields;
-    }
-
-
-
     public static boolean hasAnnotation(Field field, Class<? extends Annotation> clzz) {
         return field.getAnnotation(clzz) != null;
     }
@@ -202,47 +148,5 @@ public class ReflectHelper {
             return true;
         }
         return false;
-    }
-
-    public static boolean isKeyField(Field field,Class<?> clzz){
-        if(field.isSynthetic()){
-            return false;
-        }
-        if(Modifier.isStatic(field.getModifiers())){
-            return false;
-        }
-        if((field.getAnnotation(Key.class))==null){
-            return false;
-        }
-        return hasGetSet(field, clzz);
-    }
-
-    public static boolean isDataField(Field field,Class<?> clzz){
-        if(field.isSynthetic()){
-            return false;
-        }
-        if(Modifier.isStatic(field.getModifiers())){
-            return false;
-        }
-        if((field.getAnnotation(Exclude.class))!=null){
-            return false;
-        }
-        if((field.getAnnotation(Key.class))!=null){
-            return false;
-        }
-        return hasGetSet(field, clzz);
-    }
-
-    private static boolean hasGetSet(Field field,Class<?> clzz){
-        try {
-            PropertyDescriptor descriptor = new PropertyDescriptor(field.getName(),clzz);
-            if(descriptor.getReadMethod()!=null&&descriptor.getWriteMethod()!=null){
-                return true;
-            }
-        } catch (IntrospectionException e) {
-            e.printStackTrace();
-        }
-        return false;
-
     }
 }

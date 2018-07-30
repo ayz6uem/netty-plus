@@ -1,6 +1,7 @@
 package com.ybyc.gateway.nettyplus.core.util;
 
 
+import com.ybyc.gateway.nettyplus.core.bean.ClassFieldContext;
 import com.ybyc.gateway.nettyplus.core.bean.Groups;
 import com.ybyc.gateway.nettyplus.core.bean.Option;
 import com.ybyc.gateway.nettyplus.core.bean.StringOption;
@@ -42,7 +43,7 @@ public class OptionHelper {
                 result =  ByteBufUtil.hexDump(stringByteBuf).toUpperCase();
                 break;
             case BINARY:
-                result =  ByteBufHelper.binaryDump(byteBuf.readBytes(length));
+                result =  ByteBufHelper.binaryDump(stringByteBuf);
                 break;
             default:
                 result = new String(ByteBufUtil.getBytes(stringByteBuf));
@@ -99,7 +100,7 @@ public class OptionHelper {
 
     public static boolean containClass(Object target, Class<?> targetClass){
 
-        Collection<Field> collection = ReflectHelper.getDataField(target.getClass());
+        Collection<Field> collection = ClassFieldContext.getDataField(target.getClass());
         Iterator<Field> fields = collection.iterator();
         try {
             while (fields.hasNext()){

@@ -50,7 +50,7 @@ public class BeanDecoder {
         Assert.notArray(template.getClass(), "please use ArrayDecoder to decode an array");
         Assert.notCollection(template.getClass(), "please use CollectionDecoder to decode an collection");
         try {
-            Iterator<Field> fields = ReflectHelper.getDataField(template.getClass()).iterator();
+            Iterator<Field> fields = ClassFieldContext.getDataField(template.getClass()).iterator();
             while (fields.hasNext()) {
                 Field field = fields.next();
                 decodeField(template, field);
@@ -81,7 +81,7 @@ public class BeanDecoder {
         if(lengthBytes<Byte.BYTES || lengthBytes>Long.BYTES){
             throw new IllegalArgumentException("klv length bytes error:"+lengthBytes);
         }
-        Map<Object,Field> keyFieldMap = ReflectHelper.getKeyField(template.getClass());
+        Map<Object,Field> keyFieldMap = ClassFieldContext.getKeyField(template.getClass());
         for(int i=0;i<groupSize;i++){
             Number key = (Number)ByteBufHelper.readPrimitive(byteBuf,keyBytes,byteOrder,true);
             Number length = (Number)ByteBufHelper.readPrimitive(byteBuf,lengthBytes,byteOrder,true);
