@@ -119,8 +119,8 @@ public class TcpServer {
                                 ch.pipeline().addLast(options.frameLogRecord);
                             }
                             //指令处理集合
-                            if (Objects.nonNull(options.frameInboundHandler)) {
-                                options.frameInboundHandler.forEach(inboundHandler -> ch.pipeline().addLast(inboundHandler));
+                            if (Objects.nonNull(options.inboundHandlers)) {
+                                options.inboundHandlers.forEach(inboundHandler -> ch.pipeline().addLast(inboundHandler));
                             }
                             //其他管道处理
                             if (Objects.nonNull(pipelineConsumer)) {
@@ -231,7 +231,7 @@ public class TcpServer {
         //读写数据的字节序
         public static ByteOrder DEFAULT_BYTEORDER = ByteOrder.BIG_ENDIAN;
 
-        public Collection<GenericObjectChannelInboundHandler> frameInboundHandler;
+        public Collection<? extends ChannelInboundHandler> inboundHandlers;
 
         public Options port(int port) {
             this.port = port;
@@ -324,8 +324,8 @@ public class TcpServer {
             return this;
         }
 
-        public Options frameInboundHandler(Collection<GenericObjectChannelInboundHandler> frameInboundHandler) {
-            this.frameInboundHandler = frameInboundHandler;
+        public Options inboundHandlers(Collection<? extends ChannelInboundHandler> inboundHandlers) {
+            this.inboundHandlers = inboundHandlers;
             return this;
         }
 
