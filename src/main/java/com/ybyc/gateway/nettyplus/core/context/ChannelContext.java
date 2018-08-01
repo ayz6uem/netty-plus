@@ -110,6 +110,7 @@ public class ChannelContext {
     }
 
     public static boolean isOnline(Channel channel) {
-        return Objects.nonNull(channel.attr(ChannelContext.BIZ_ID_KEY).get());
+        Object id = getId(channel);
+        return Objects.nonNull(id) && ChannelContext.getInstance().contain(id);
     }
 }
