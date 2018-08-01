@@ -28,7 +28,7 @@ public class DirectiveInterceptor extends MessageToMessageDecoder<Directive> {
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, Directive directive, List list) throws Exception {
-        if(ChannelContext.isOnline(channelHandlerContext.channel()) || contain(directive)){
+        if(ChannelContext.getInstance().isOnline(channelHandlerContext.channel()) || contain(directive)){
             list.add(directive);
             return;
         }
