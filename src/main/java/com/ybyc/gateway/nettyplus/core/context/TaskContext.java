@@ -93,34 +93,38 @@ public class TaskContext {
      * @param id
      * @param result
      */
-    public void wakeup(Object id, Channel channel, Object result) {
+    public boolean wakeup(Object id, Channel channel, Object result) {
         if (Objects.nonNull(id)) {
             Task task = taskPool.remove(id);
             if (task != null) {
                 task.timeout.cancel();
                 task.success(channel, result);
+                return true;
             }
         }
+        return false;
     }
 
-    public void wakeup(Channel channel, Object result) {
-        wakeup(ChannelContext.getId(channel), channel, result);
+    public boolean wakeup(Channel channel, Object result) {
+        return wakeup(ChannelContext.getId(channel), channel, result);
     }
 
-    public void wakeup(Channel channel, Object directive, Object result) {
-        wakeup(ChannelContext.getId(channel), channel, directive, result);
+    public boolean wakeup(Channel channel, Object directive, Object result) {
+        return wakeup(ChannelContext.getId(channel), channel, directive, result);
     }
 
-    public void wakeup(Object id, Channel channel, Object directive, Object result) {
+    public boolean wakeup(Object id, Channel channel, Object directive, Object result) {
         if (Objects.nonNull(id) && Objects.nonNull(directive)) {
-            wakeup(Tuples.of(id, directive), channel, result);
+            return wakeup(Tuples.of(id, directive), channel, result);
         }
+        return false;
     }
 
-    public void wakeup(Object id, Channel channel, Object directive, Object msgId, Object result) {
+    public boolean wakeup(Object id, Channel channel, Object directive, Object msgId, Object result) {
         if (Objects.nonNull(id) && Objects.nonNull(directive) && Objects.nonNull(msgId)) {
-            wakeup(Tuples.of(id, directive, msgId), channel, result);
+            return wakeup(Tuples.of(id, directive, msgId), channel, result);
         }
+        return false;
     }
 
     /**
