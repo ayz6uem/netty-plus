@@ -2,6 +2,7 @@ package com.ybyc.gateway.nettyplus.core;
 
 import com.ybyc.gateway.nettyplus.core.codec.Directive;
 import com.ybyc.gateway.nettyplus.core.codec.DirectiveCodec;
+import com.ybyc.gateway.nettyplus.core.codec.FixedHeadLengthFieldBasedFrameDecoder;
 import com.ybyc.gateway.nettyplus.core.codec.LengthFieldBasedFrameEncoder;
 import com.ybyc.gateway.nettyplus.core.context.ChannelContext;
 import com.ybyc.gateway.nettyplus.core.context.TaskContext;
@@ -284,6 +285,27 @@ public class TcpServer {
                 pipeline.addLast(SLICE_FRAME_DECODER_NAME,
                         new LengthFieldBasedFrameDecoder(Options.DEFAULT_BYTEORDER,
                                 frameMaxLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, lengthInitialBytes,true));
+                pipeline.addLast(LengthFieldBasedFrameEncoder.class.getSimpleName(),
+                        new LengthFieldBasedFrameEncoder(lengthFieldOffset, lengthFieldLength, lengthAdjustment));
+
+            };
+            return this;
+        }
+
+        /**
+         * 基于帧头和长度的编码器
+         * @param lengthFieldOffset
+         * @param lengthFieldLength
+         * @param lengthAdjustment
+         * @param lengthInitialBytes
+         * @return
+         */
+        public Options fixHeadAndLengthField(int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int lengthInitialBytes, byte ... head) {
+            sliceFrameDecoderConsumer = pipeline -> {
+                pipeline.addLast(SLICE_FRAME_DECODER_NAME,
+                        new FixedHeadLengthFieldBasedFrameDecoder(Options.DEFAULT_BYTEORDER,
+                                frameMaxLength, lengthFieldOffset, lengthFieldLength,
+                                lengthAdjustment, lengthInitialBytes,true, head));
                 pipeline.addLast(LengthFieldBasedFrameEncoder.class.getSimpleName(),
                         new LengthFieldBasedFrameEncoder(lengthFieldOffset, lengthFieldLength, lengthAdjustment));
 
